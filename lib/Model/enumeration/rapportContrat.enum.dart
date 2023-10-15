@@ -1,0 +1,1 @@
+enum RapportContrat { CONTRAT, AVENANT, AVENANT_CONTRAT }

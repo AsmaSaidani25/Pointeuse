@@ -1,0 +1,7 @@
+enum EntityAction {
+  CREATION,
+  DELETION,
+  MODIFICATION,
+  AUTORISATION,
+  OPEN_CLOSE,
+}
