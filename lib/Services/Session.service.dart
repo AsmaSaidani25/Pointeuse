@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -9,22 +10,19 @@ import 'dart:io';
 class SessionService {
   static late SharedPreferences _prefs;
 
-  get uuid => null;
-
-  Future<void> initialize() async {
+  static Future<void> initialize() async {
     _prefs = await SharedPreferences.getInstance();
   }
 
+  get uuid => null;
+
   // Singleton pattern
-  static final SessionService _instance = SessionService._internal();
-  factory SessionService() => _instance;
-  SessionService._internal() {
-    initialize();
-  }
+  //static final SessionService _instance = SessionService._internal();
+  //factory SessionService() => _instance;
 
   static Future<void> setPointeuseState(dynamic state) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('_State#', state.toString());
+    final myValue = _prefs.setString('_State#', state.toString());
+    print(myValue); // Do something with myValue
   }
 
   static bool get isConnected => _prefs.getBool('_isConnected') ?? false;
@@ -114,10 +112,9 @@ class SessionService {
   }
 
   static Future<void> setDateJournee(DateTime dateJournee) async {
-    final prefs = await SharedPreferences.getInstance();
     final formattedDate =
         '${dateJournee.year}-${(dateJournee.month + 1).toString().padLeft(2, '0')}-${dateJournee.day.toString().padLeft(2, '0')}';
-    await prefs.setString('_dateJournee', formattedDate);
+    await _prefs.setString('_dateJournee', formattedDate);
   }
 
   static Future<void> setJournee(String journee) async {
@@ -151,8 +148,15 @@ class SessionService {
     _prefs.setBool('_Auth#', value);
   }
 
-  static String getDateJournee() {
-    return _prefs.getString('_dateJournee') ?? '';
+  static Future<String> getDateJournee() async {
+    final myValue = _prefs.getString('_dateJournee');
+
+    if (_prefs != null) {
+      return myValue ?? '';
+    } else {
+      // Handle the case where _prefs is null (e.g., it's not initialized)
+      throw Exception('Value for _dateJournee is null');
+    }
   }
 
   void setPdfCorrectionPointageSettings(Map<String, dynamic> settings) {
@@ -184,24 +188,40 @@ class SessionService {
     }
   }
 
-  static String uuidGenerator(int id) {
-    final uuid = Uuid();
-    final uuidString = uuid.v4();
-    return uuidString.substring(0, 10) +
-        ((id + 5555) * 133).toString() +
-        uuidString.substring(10, 20);
+  static String uuidGenerator(String idd) {
+    int id = int.parse(idd);
+    final uuidString = Uuid().v4();
+    final firstPart = uuidString.substring(0, 10);
+    final secondPart = uuidString.substring(10, 20);
+    final result = '$firstPart${(id + 5555) * 133}$secondPart';
+    return result;
   }
 
   static void setSyncPointageProgress(bool syncPointages) {
-    _prefs.setBool('syncPointages', syncPointages);
+    if (_prefs != null) {
+      final value = _prefs.setBool('syncPointages', syncPointages);
+    } else {
+      // Handle the case where _prefs is null (e.g., it's not initialized)
+      throw Exception('SharedPreferences not initialized');
+    }
   }
 
   static bool getSyncPointageProgress() {
     return _prefs.getBool('syncPointages') ?? false;
   }
 
-  static void setSyncEmployesProgress(bool syncEmployes) {
-    _prefs.setBool('syncEmployes', syncEmployes);
+  static Future<void> setSyncEmployesProgress(bool syncEmployes) async {
+    //final prefs = await SharedPreferences.getInstance();
+
+    // Check if _prefs has been initialized
+    if (_prefs != null) {
+      _prefs.setBool('syncEmployes', syncEmployes);
+      final myValue = _prefs.setBool('syncEmployes', syncEmployes);
+      print(myValue);
+    } else {
+      // Handle the case where _prefs is null (e.g., it's not initialized)
+      throw Exception('SharedPreferences not initialized');
+    }
   }
 
   static bool getSyncEmployesProgress() {
@@ -346,6 +366,23 @@ class SessionService {
       default:
         return 'noSyncType';
     }
+  }
+
+  static Future<void> setCodeRestaurant(String codeRestaurant) async {
+    await _prefs.setString('_CodeRestaurant', codeRestaurant);
+  }
+
+  static Future<void> setIdRestaurant(String restaurantId) async {
+    await _prefs.setString('_Restaurant#', restaurantId);
+  }
+
+  static Future<void> setRestaurantName(String restaurantName) async {
+    await _prefs.setString('_RestaurantName', restaurantName);
+  }
+
+  static Future<bool> getIsTechnicien() async {
+    final isTechString = _prefs.getString('_isTech');
+    return isTechString == 'true';
   }
 
   static void setLastSync(String journee) {

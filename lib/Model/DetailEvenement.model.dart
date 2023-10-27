@@ -1,30 +1,30 @@
 class DetailEvenement {
   int? idDetailEvenement;
   dynamic dateEvent;
-  double? nbHeure;
+  double nbHeure;
   dynamic heureDebut;
-  bool? heureDebutValeurNuit;
+  bool heureDebutValeurNuit;
   dynamic heureFin;
-  bool? heureFinValeurNuit;
+  bool heureFinValeurNuit;
 
   DetailEvenement({
     this.idDetailEvenement,
     this.dateEvent,
-    this.nbHeure,
+    required this.nbHeure,
     this.heureDebut,
-    this.heureDebutValeurNuit,
+    required this.heureDebutValeurNuit,
     this.heureFin,
-    this.heureFinValeurNuit,
+    required this.heureFinValeurNuit,
   });
   factory DetailEvenement.fromJson(Map<String, dynamic> map) {
     return DetailEvenement(
-      idDetailEvenement: map['idDetailEvenement'],
-      dateEvent: map['dateEvent'],
-      nbHeure: map['nbHeure'],
-      heureDebut: map['heureDebut'],
-      heureDebutValeurNuit: map['heureDebutValeurNuit'],
-      heureFin: map['heureFin'],
-      heureFinValeurNuit: map['heureFinValeurNuit'],
+      idDetailEvenement: map['idDetailEvenement'] ?? '',
+      dateEvent: map['dateEvent'] ?? '',
+      nbHeure: map['nbHeure'] ?? false,
+      heureDebut: map['heureDebut'] ?? '',
+      heureDebutValeurNuit: map['heureDebutValeurNuit'] ?? false,
+      heureFin: map['heureFin'] ?? '',
+      heureFinValeurNuit: map['heureFinValeurNuit'] ?? false,
     );
   }
 

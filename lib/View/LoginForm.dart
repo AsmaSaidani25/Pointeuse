@@ -3,8 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:pointeuse/Controller/FadeAnimation.dart';
-import 'package:pointeuse/Controller/LoginController.dart';
-import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'Restaurant.dart';
 
@@ -35,6 +34,10 @@ class _LoginFormState extends State<LoginForm> {
       loginController.login(email, password);
     }*/
   //}
+  Future<void> saveBearerToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('bearerToken', token);
+  }
 
   Future<void> _login() async {
     // if (_keyForm.currentState!.validate()) {
@@ -62,6 +65,10 @@ class _LoginFormState extends State<LoginForm> {
 
         if (response.statusCode == 200) {
           final jsonResponse = jsonDecode(response.body);
+          final token = response.headers['authorization'];
+
+          // Save the token
+          //await saveBearerToken(token);
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => Restaurant()),

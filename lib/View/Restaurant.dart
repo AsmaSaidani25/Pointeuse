@@ -2,10 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:pointeuse/DatabaseHandler/DbHelper.dart';
+import 'package:pointeuse/DatabaseHandler/DatabaseHelper.dart';
 import 'package:pointeuse/Model/RestaurantGUI.model.dart';
+import 'package:pointeuse/Services/RestaurantDataService.dart';
 import 'package:pointeuse/Services/RestaurantService.dart';
-import 'package:pointeuse/Services/Session.service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'curved_nav_bar.dart';
 
 class Restaurant extends StatefulWidget {
@@ -28,19 +29,21 @@ class _RestaurantState extends State<Restaurant> {
   RestaurantGUI? selectedRestaurant;
 
   final RestaurantService restaurantService = RestaurantService();
-  final DbHelper dbHelper =
-      DbHelper(); // Create an instance of your RestaurantService
-
+  // Create an instance of your RestaurantService
+  late String codePointeuse = "";
   @override
   void initState() {
     super.initState();
+    if (selectedRestaurant != null) {
+      codePointeuse = selectedRestaurant!.codePointeuse!;
+    }
     getData(); // Call getData when the widget is initialized
   }
 
   Future<void> saveSelectedRestaurantToDb() async {
     if (selectedRestaurant != null) {
       try {
-        int? result = await dbHelper.saveSelectedRestaurant(
+        int? result = await DatabaseHelper.saveSelectedRestaurant(
           selectedRestaurant!.libelle!,
           selectedRestaurant!.codePointeuse!,
         );
@@ -63,7 +66,7 @@ class _RestaurantState extends State<Restaurant> {
             codePointeuse),
         headers: {
           'Authorization':
-              'Bearer_RH_IS eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc21haWwubWFuc291cmlAcmhpcy1zb2x1dGlvbnMuY29tIiwiYXVkIjoiNDMyMCIsImlzcyI6ImV5SmhiR2NpT2lKSVV6STFOaUo5LmV5SnpkV0lpT2lKU1JVWlNSVk5JWDFSUFMwVk9JaXdpYVhOeklqb2lhWE50WVdsc0xtMWhibk52ZFhKcFFISm9hWE10YzI5c2RYUnBiMjV6TG1OdmJTSXNJbVY0Y0NJNk1UWTVNamczT1RneU4zMC43QVN5V0Fpb3ZjbjRsYS1vTjRqdmRtcUQzM19BZ3JGLXhzNDA4MXVTSG1VIiwiZXhwIjoxNjkyODc5ODI3LCJhdXRob3JpdGllcyI6W119.iuwCcXRja-yfSugWGFxLJvs0c9Ja29ey3gKeqD7J81E',
+              'Bearer_RH_IS eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc21haWwubWFuc291cmlAcmhpcy1zb2x1dGlvbnMuY29tIiwiYXVkIjoiNDMyMCIsImlzcyI6ImV5SmhiR2NpT2lKSVV6STFOaUo5LmV5SnpkV0lpT2lKU1JVWlNSVk5JWDFSUFMwVk9JaXdpYVhOeklqb2lhWE50WVdsc0xtMWhibk52ZFhKcFFISm9hWE10YzI5c2RYUnBiMjV6TG1OdmJTSXNJbVY0Y0NJNk1UWTVPRFUyTnpnMk4zMC5qZWhTdDVfZ1FMN3g5X2dWV3hGamRWUU9EdTNtY1lOTkVpcllPWWduOHRNIiwiZXhwIjoxNjk4NTY3ODY3LCJhdXRob3JpdGllcyI6W119.ZEsz4Y917TGGfJZuMCKOU50fjEAzhB6OCwLqDJsBhqc',
         });
     print(response.body);
     if (response.statusCode == 200) {
@@ -75,14 +78,22 @@ class _RestaurantState extends State<Restaurant> {
     }
   }
 
+  static Future<String> getBearerToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('bearerToken') ??
+        ''; // Return an empty string if the token doesn't exist
+  }
+
   Future<void> getData() async {
+    final token = await getBearerToken();
+
     try {
       final response = await http.get(
         Uri.parse(
             'https://preprod.myrhis.fr/security/user/listrestaurants/ismail.mansouri@rhis-solutions.com'),
         headers: {
           'Authorization':
-              'Bearer_RH_IS eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc21haWwubWFuc291cmlAcmhpcy1zb2x1dGlvbnMuY29tIiwiYXVkIjoiNDMyMCIsImlzcyI6ImV5SmhiR2NpT2lKSVV6STFOaUo5LmV5SnpkV0lpT2lKU1JVWlNSVk5JWDFSUFMwVk9JaXdpYVhOeklqb2lhWE50WVdsc0xtMWhibk52ZFhKcFFISm9hWE10YzI5c2RYUnBiMjV6TG1OdmJTSXNJbVY0Y0NJNk1UWTVOelkwT0RZd09IMC5uX2xXSlo3R3NTQ3lIUC10UEY4b0c4elJudGxDYWlkOFhVWDFBR1ZjeHVZIiwiZXhwIjoxNjk3NjQ4NjA4LCJhdXRob3JpdGllcyI6W119._jLknb30LL9BAQqtXc3qg2qQzX1aNsYYN5KyEdHlsE4',
+              'Bearer_RH_IS eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc21haWwubWFuc291cmlAcmhpcy1zb2x1dGlvbnMuY29tIiwiYXVkIjoiNDMyMCIsImlzcyI6ImV5SmhiR2NpT2lKSVV6STFOaUo5LmV5SnpkV0lpT2lKU1JVWlNSVk5JWDFSUFMwVk9JaXdpYVhOeklqb2lhWE50WVdsc0xtMWhibk52ZFhKcFFISm9hWE10YzI5c2RYUnBiMjV6TG1OdmJTSXNJbVY0Y0NJNk1UWTVPRFUyTnpnMk4zMC5qZWhTdDVfZ1FMN3g5X2dWV3hGamRWUU9EdTNtY1lOTkVpcllPWWduOHRNIiwiZXhwIjoxNjk4NTY3ODY3LCJhdXRob3JpdGllcyI6W119.ZEsz4Y917TGGfJZuMCKOU50fjEAzhB6OCwLqDJsBhqc',
         },
       );
       print('Response Status Code: ${response.statusCode}');
@@ -141,7 +152,7 @@ class _RestaurantState extends State<Restaurant> {
     );
   }
 
-  void showNotAssociatedDialog() {
+  void showNotAssociatedDialog() async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -151,7 +162,8 @@ class _RestaurantState extends State<Restaurant> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                RestaurantDataService.getRestaurantByCodePointeuse(
+                    selectedRestaurant!.codePointeuse!);
               },
               child: Text("OK"),
             ),
@@ -290,20 +302,19 @@ class _RestaurantState extends State<Restaurant> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
-                    String codePointeuse = selectedRestaurant!.codePointeuse!;
                     bool isAssociatedResult = await isAssociated(codePointeuse);
                     if (isAssociatedResult) {
                       showAssociatedDialog();
                     } else {
                       showNotAssociatedDialog();
                     }
-                    Future.delayed(Duration(seconds: 3), () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => curved_nav_bar()),
-                      );
-                    });
+                    // Future.delayed(Duration(seconds: 3), () {
+                    //   Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //         builder: (context) => curved_nav_bar()),
+                    //   );
+                    // });
                   },
                   style: ButtonStyle(
                     foregroundColor:

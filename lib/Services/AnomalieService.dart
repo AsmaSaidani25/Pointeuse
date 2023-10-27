@@ -15,8 +15,8 @@ class AnomalieService extends GenericCRUDRestService<AnomalieModel, String> {
       SessionService sessionService)
       : ListIdEmployees = <int>[];
 
-  Future<List<AnomalieModel>?> getAllAnomalieByRestaurant(
-      int idRestaurant) async {
+  static Future<List<AnomalieModel>?> getAllAnomalieByRestaurant(
+      String idRestaurant) async {
     final uuidRestaurant = SessionService.idRestaurant;
     final response = await http.get(Uri.parse('/pointeuse/$uuidRestaurant'));
 

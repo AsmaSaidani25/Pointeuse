@@ -39,7 +39,7 @@ class EmployeeModel {
   var carte;
   var hebdoCourant;
   var complAdresse;
-  bool? hasLaws;
+  bool hasLaws;
   BadgeModel? badge;
   List<String> sexeEnumeration = Sexe.values.map((e) => e.toString()).toList();
   List<String> situationFamilialEnumeration =
@@ -92,7 +92,7 @@ class EmployeeModel {
       carte,
       hebdoCourant,
       complAdresse,
-      hasLaws,
+      required this.hasLaws,
       badge,
       required List<String> sexeEnumeration,
       required List<String> situationFamilialEnumeration,
@@ -122,7 +122,8 @@ class EmployeeModel {
         loiSpecifiques: [],
         absenceConges: [],
         restaurantDePret: [],
-        shifts: [])
+        shifts: [],
+        hasLaws: false)
       ..idEmployee = map['idEmployee']
       ..idFront = map['idFront']
       ..matricule = map['matricule']
@@ -232,48 +233,51 @@ class EmployeeModel {
   // Factory constructor to create an EmployeeModel from a map
   factory EmployeeModel.fromJson(Map<String, dynamic> map) {
     return EmployeeModel(
-      idEmployee: map['idEmployee'],
-      idFront: map['idFront'],
-      matricule: map['matricule'],
-      email: map['email'],
-      restaurantId: map['restaurantId'],
-      idRestaurant: map['idRestaurant'],
-      sexe: map['sexe'],
-      nom: map['nom'],
-      prenom: map['prenom'],
-      adresse: map['adresse'],
-      nomJeuneFille: map['nomJeuneFille'],
-      situationFamiliale: map['situationFamiliale'],
-      dateNaissance: map['dateNaissance'],
-      codePostal: map['codePostal'],
-      ville: map['ville'],
-      numTelephone: map['numTelephone'],
-      numPortable: map['numPortable'],
-      dateEntree: map['dateEntree'],
-      dateSortie: map['dateSortie'],
-      dateRemise: map['dateRemise'],
-      dateRestitution: map['dateRestitution'],
-      motifSortie: map['motifSortie'],
-      statut: map['statut'],
-      majeur: map['majeur'],
-      etat: map['etat'],
-      carte: map['carte'],
-      hebdoCourant: map['hebdoCourant'],
-      complAdresse: map['complAdresse'],
-      hasLaws: map['hasLaws'],
-      badge: BadgeModel.fromJson(
-          map['badge']), // You'll need to implement BadgeModel.fromJson
+      idEmployee: map['idEmployee'] ?? '',
+      idFront: map['idFront'] ?? '',
+      matricule: map['matricule'] ?? '',
+      email: map['email'] ?? '',
+      restaurantId: map['restaurantId'] ?? '',
+      idRestaurant: map['idRestaurant'] ?? '',
+      sexe: map['sexe'] ?? '',
+      nom: map['nom'] ?? '',
+      prenom: map['prenom'] ?? '',
+      adresse: map['adresse'] ?? '',
+      nomJeuneFille: map['nomJeuneFille'] ?? '',
+      situationFamiliale: map['situationFamiliale'] ?? '',
+      dateNaissance: map['dateNaissance'] ?? '',
+      codePostal: map['codePostal'] ?? '',
+      ville: map['ville'] ?? '',
+      numTelephone: map['numTelephone'] ?? '',
+      numPortable: map['numPortable'] ?? '',
+      dateEntree: map['dateEntree'] ?? '',
+      dateSortie: map['dateSortie'] ?? '',
+      dateRemise: map['dateRemise'] ?? '',
+      dateRestitution: map['dateRestitution'] ?? '',
+      motifSortie: map['motifSortie'] ?? '',
+      statut: map['statut'] ?? '',
+      majeur: map['majeur'] ?? '',
+      etat: map['etat'] ?? '',
+      carte: map['carte'] ?? '',
+      hebdoCourant: map['hebdoCourant'] ?? '',
+      complAdresse: map['complAdresse'] ?? '',
+      hasLaws: map['hasLaws'] ?? false,
+      badge: map['badge'] != null
+          ? BadgeModel.fromJson(map['badge'])
+          : null, // You'll need to implement BadgeModel.fromJson
       // Handle enums
-      sexeEnumeration: List<String>.from(map['sexeEnumeration']),
+      sexeEnumeration: List<String>.from(map['sexeEnumeration'] ?? ''),
       situationFamilialEnumeration:
-          List<String>.from(map['situationFamilialEnumeration']),
+          List<String>.from(map['situationFamilialEnumeration'] ?? ''),
       // Rest of the properties
-      finValiditeSejour: map['finValiditeSejour'],
-      finValiditeAutorisationTravail: map['finValiditeAutorisationTravail'],
-      restaurantDePret: List<String>.from(map['restaurantDePret']),
+      finValiditeSejour: map['finValiditeSejour'] ?? '',
+      finValiditeAutorisationTravail:
+          map['finValiditeAutorisationTravail'] ?? '',
+      restaurantDePret: List<String>.from(map['restaurantDePret'] ?? ''),
       displayedName: map['displayedName'],
-      groupeTravail: GroupeTravailModel.fromJson(map[
-          'groupeTravail']), // You'll need to implement GroupeTravailModel.fromJson
+      groupeTravail: map['groupeTravail'] != null
+          ? GroupeTravailModel.fromJson(map['groupeTravail'])
+          : null, // You'll need to implement GroupeTravailModel.fromJson
       // Handle lists
       absenceConges: List<AbsenceCongeModel>.from(
           map['absenceConges']?.map((x) => AbsenceCongeModel.fromJson(x))),
@@ -282,12 +286,12 @@ class EmployeeModel {
       loiPointeuse: List<LoiPaysModel>.from(
           map['loiPointeuse']?.map((x) => LoiPaysModel.fromJson(x))),
       // Rest of the properties
-      totalRowTime: map['totalRowTime'],
-      fullName: map['fullName'],
+      totalRowTime: map['totalRowTime'] ?? '',
+      fullName: map['fullName'] ?? '',
       disablePlanningManagerOrLeaderOrFixe:
-          map['disablePlanningManagerOrLeaderOrFixe'],
-      isSelected: map['isSelected'],
-      prete: map['prete'],
+          map['disablePlanningManagerOrLeaderOrFixe'] ?? '',
+      isSelected: map['isSelected'] ?? '',
+      prete: map['prete'] ?? '',
       etatPret: map['etatPret'] != null
           ? EtatPretEnumeration.values
               .firstWhere((e) => e.toString() == map['etatPret'])

@@ -1,4 +1,5 @@
 import 'dart:core';
+import 'package:pointeuse/DatabaseHandler/DatabaseHelper.dart';
 import 'package:pointeuse/Model/decoupage.horaire.model.dart';
 import 'package:pointeuse/Model/employee.model.dart';
 import 'package:pointeuse/Model/enumeration/codeNameContrainteSocial.dart';
@@ -37,18 +38,18 @@ class ContrainteSocialeService {
         return {
           'isValidated': majeur
               ? realValue >=
-                  (loiValue = fn(loi.valeurMajeurTempsPartiel!) as double)
+                  (loiValue = fn(loi.valeurMajeurTempsPartiel) as double)
               : realValue >=
-                  (loiValue = fn(loi.valeurMineurTempsPartiel!) as double),
+                  (loiValue = fn(loi.valeurMineurTempsPartiel) as double),
           'loiValue': loiValue,
         };
       } else {
         return {
           'isValidated': majeur
               ? realValue >=
-                  (loiValue = fn(loi.valeurMajeurTempsPlein!) as double)
+                  (loiValue = fn(loi.valeurMajeurTempsPlein) as double)
               : realValue >=
-                  (loiValue = fn(loi.valeurMineurTempsPlein!) as double),
+                  (loiValue = fn(loi.valeurMineurTempsPlein) as double),
           'loiValue': loiValue,
         };
       }
@@ -58,18 +59,18 @@ class ContrainteSocialeService {
         return {
           'isValidated': majeur
               ? realValue <=
-                  (loiValue = fn(loi.valeurMajeurTempsPartiel!) as double)
+                  (loiValue = fn(loi.valeurMajeurTempsPartiel) as double)
               : realValue <=
-                  (loiValue = fn(loi.valeurMineurTempsPartiel!) as double),
+                  (loiValue = fn(loi.valeurMineurTempsPartiel) as double),
           'loiValue': loiValue,
         };
       } else {
         return {
           'isValidated': majeur
               ? realValue <=
-                  (loiValue = fn(loi.valeurMajeurTempsPlein!) as double)
+                  (loiValue = fn(loi.valeurMajeurTempsPlein) as double)
               : realValue <=
-                  (loiValue = fn(loi.valeurMineurTempsPlein!) as double),
+                  (loiValue = fn(loi.valeurMineurTempsPlein) as double),
           'loiValue': loiValue,
         };
       }
@@ -83,10 +84,12 @@ class ContrainteSocialeService {
 
   static Future<bool> checkIsNight(
       DateTime nowDate, DateTime referenceDate) async {
-    final decoupageService = DecoupageHoraireJsStoreService();
+    final database = await DatabaseHelper.getDatabase();
+    final dbService = DecoupageHoraireJsStoreService(database);
+
     List<DecoupageHoraireModel>? listDecoupageHoraire =
-        await decoupageService.getListDecoupage();
-    DecoupageHoraireModel finJournee = listDecoupageHoraire!.firstWhere(
+        await dbService.getListDecoupage();
+    DecoupageHoraireModel finJournee = listDecoupageHoraire.firstWhere(
       (item) => item.phaseLibelle == 'FJA',
       orElse: () => DecoupageHoraireModel(
         idDecoupageHoraire: 0,

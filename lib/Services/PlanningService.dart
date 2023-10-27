@@ -12,7 +12,7 @@ class PlanningService extends GenericCRUDRestService<PointageModel, String> {
   PlanningService(http.Client httpClient, String baseUrl);
 
   static Future<List<PointageModel>> getListPointageByIdRestaurant(
-      int idRestaurant) async {
+      String idRestaurant) async {
     final uuidRestaurant = SessionService.uuidGenerator(idRestaurant);
     final response = await http.get(
       Uri.parse('https://qa.myrhis.fr/gdh/pointage/$uuidRestaurant'),

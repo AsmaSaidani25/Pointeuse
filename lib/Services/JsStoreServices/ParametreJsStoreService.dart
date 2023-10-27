@@ -35,8 +35,9 @@ class ParametreJsStoreService extends DbJsStoreService {
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  Future<List<ParametreModel>> getListParameter() async {
-    final maps = await _database.query('parameter');
+  static Future<List<ParametreModel>> getListParameter() async {
+    ParametreJsStoreService instance = ParametreJsStoreService();
+    final maps = await instance._database.query('parameter');
     return List.generate(maps.length, (index) {
       return ParametreModel.fromMap(maps[index]);
     });
@@ -56,7 +57,7 @@ class ParametreJsStoreService extends DbJsStoreService {
 
   static Future<List<ParametreModel>> getParamatreByParam(String param) async {
     ParametreJsStoreService instance = ParametreJsStoreService();
-    final List<Map<String, dynamic>> results = await instance._database!.query(
+    final List<Map<String, dynamic>> results = await instance._database.query(
       NameOfTable.PARAMETRE,
       where: 'param = ?',
       whereArgs: [param],

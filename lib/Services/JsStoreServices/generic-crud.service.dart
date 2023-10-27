@@ -6,8 +6,7 @@ class GenericCRUDSqliteService<T, G> {
   late final String baseUrl;
 
   Future<void> add(T entity, {required String apiUrl}) async {
-    final response =
-        await http.post(Uri.parse(baseUrl + (apiUrl ?? '/')), body: entity);
+    final response = await http.post(Uri.parse(baseUrl + apiUrl), body: entity);
     if (response.statusCode == 200) {
       print('Entity added successfully');
     } else {
@@ -16,8 +15,7 @@ class GenericCRUDSqliteService<T, G> {
   }
 
   Future<T?> update(T entity, {required String apiUrl}) async {
-    final response =
-        await http.put(Uri.parse(baseUrl + (apiUrl ?? '/')), body: entity);
+    final response = await http.put(Uri.parse(baseUrl + apiUrl), body: entity);
     if (response.statusCode == 200) {
       print('Entity updated successfully');
       // Parse response.body if needed
@@ -28,7 +26,7 @@ class GenericCRUDSqliteService<T, G> {
 
   Future<void> remove(G id, {required String apiUrl}) async {
     final response =
-        await http.delete(Uri.parse(baseUrl + (apiUrl ?? '/') + id.toString()));
+        await http.delete(Uri.parse(baseUrl + apiUrl), body: id.toString());
     if (response.statusCode == 200) {
       print('Entity removed successfully');
     } else {
@@ -37,8 +35,7 @@ class GenericCRUDSqliteService<T, G> {
   }
 
   Future<T?> getOneById(G id, {String? apiUrl}) async {
-    final response =
-        await http.get(Uri.parse(baseUrl + (apiUrl ?? '/') + id.toString()));
+    final response = await http.get(Uri.parse(baseUrl + apiUrl!));
     if (response.statusCode == 200) {
       print('Entity retrieved successfully');
       // Parse response.body if needed
@@ -51,7 +48,7 @@ class GenericCRUDSqliteService<T, G> {
   }
 
   Future<List<T>> getAll({String? apiUrl}) async {
-    final response = await http.get(Uri.parse(baseUrl + (apiUrl ?? '/')));
+    final response = await http.get(Uri.parse(baseUrl + apiUrl!));
     if (response.statusCode == 200) {
       print('Entities retrieved successfully');
       // Parse response.body if needed

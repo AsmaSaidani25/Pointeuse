@@ -15,7 +15,8 @@ class MessageService extends GenericCRUDRestService<MessageModel, String> {
       SessionService sessionService)
       : baseUrl = '${pathService.getPathEmployee()}/message';
 
-  Future<List<MessageModel>> getMessagesByRestaurant(int idRestaurant) async {
+  static Future<List<MessageModel>> getMessagesByRestaurant(
+      String idRestaurant) async {
     final uuidRestaurant = SessionService.idRestaurant;
     final response = await http
         .get(Uri.parse('https://qa.myrhis.fr/byRestaurant/$uuidRestaurant'));

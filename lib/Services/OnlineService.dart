@@ -1,4 +1,3 @@
-import 'dart:html';
 import 'dart:async';
 
 class OnlineService {
@@ -10,8 +9,8 @@ class OnlineService {
 
   Stream<bool> _listenToOnlineStatus() {
     final controller = StreamController<bool>();
-    window.onOnline.listen((event) => controller.add(true));
-    window.onOffline.listen((event) => controller.add(false));
+    //window.onOnline.listen((event) => controller.add(true));
+    //window.onOffline.listen((event) => controller.add(false));
     return controller.stream;
   }
 

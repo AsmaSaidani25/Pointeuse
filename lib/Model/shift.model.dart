@@ -5,28 +5,28 @@ class ShiftModel {
   dynamic idShift;
   String? idFront;
   dynamic heureDebut;
-  bool? heureDebutIsNight;
+  bool heureDebutIsNight;
   dynamic heureFin;
-  bool? heureFinIsNight;
+  bool heureFinIsNight;
   dynamic dateJournee;
   dynamic totalHeure;
   dynamic nombreEmployeeRequis;
   dynamic shiftPrincipale;
   dynamic heureDebutModifier;
-  bool? heureDebutModifierIsNight;
+  bool heureDebutModifierIsNight;
   dynamic heureFinModifier;
-  bool? heureFinModifierIsNight;
+  bool heureFinModifierIsNight;
   EmployeeModel? employee;
   dynamic idPlanning;
   dynamic idRestaurant;
   bool sign = false;
   dynamic heureDebutCheval;
   dynamic heureFinCheval;
-  bool? heureDebutChevalIsNight;
-  bool? heureFinChevalIsNight;
+  bool heureDebutChevalIsNight;
+  bool heureFinChevalIsNight;
   dynamic acheval;
   dynamic modifiable;
-  DateInterval dateInterval;
+  DateInterval? dateInterval;
 
   String toStringa() {
     return 'ShiftModel {\n'
@@ -87,6 +87,92 @@ class ShiftModel {
     };
   }
 
+  // factory ShiftModel.fromMap(Map<String, dynamic> map) {
+  //   return ShiftModel(
+  //     idShift: map['idShift'],
+  //     idFront: map['idFront'],
+  //     heureDebut: map['heureDebut'],
+  //     heureDebutIsNight: map['heureDebutIsNight'],
+  //     heureFin: map['heureFin'],
+  //     heureFinIsNight: map['heureFinIsNight'],
+  //     dateJournee: map['dateJournee'],
+  //     totalHeure: map['totalHeure'],
+  //     nombreEmployeeRequis: map['nombreEmployeeRequis'],
+  //     shiftPrincipale: map['shiftPrincipale'],
+  //     heureDebutModifier: map['heureDebutModifier'],
+  //     heureDebutModifierIsNight: map['heureDebutModifierIsNight'],
+  //     heureFinModifier: map['heureFinModifier'],
+  //     heureFinModifierIsNight: map['heureFinModifierIsNight'],
+  //     employee: EmployeeModel.fromMap(map['employee']),
+  //     idPlanning: map['idPlanning'],
+  //     idRestaurant: map['idRestaurant'],
+  //     // sign: map['sign'] ?? false,
+  //     heureDebutCheval: map['heureDebutCheval'],
+  //     heureFinCheval: map['heureFinCheval'],
+  //     heureDebutChevalIsNight: map['heureDebutChevalIsNight'],
+  //     heureFinChevalIsNight: map['heureFinChevalIsNight'],
+  //     acheval: map['acheval'],
+  //     modifiable: map['modifiable'], dateInterval: map['dateInterval'],
+  //   );
+  // }
+  ShiftModel({
+    this.idShift,
+    this.idFront,
+    this.heureDebut,
+    required this.heureDebutIsNight,
+    this.heureFin,
+    required this.heureFinIsNight,
+    this.dateJournee,
+    this.totalHeure,
+    this.nombreEmployeeRequis,
+    this.shiftPrincipale,
+    this.heureDebutModifier,
+    required this.heureDebutModifierIsNight,
+    this.heureFinModifier,
+    required this.heureFinModifierIsNight,
+    this.employee,
+    this.idPlanning,
+    this.idRestaurant,
+    this.heureDebutCheval,
+    this.heureFinCheval,
+    required this.heureDebutChevalIsNight,
+    required this.heureFinChevalIsNight,
+    this.acheval,
+    this.modifiable,
+    this.dateInterval,
+    sign,
+  });
+  factory ShiftModel.fromJson(Map<String, dynamic> json) {
+    return ShiftModel(
+      idShift: json['idShift'] ?? '',
+      idFront: json['idFront'] ?? '',
+      heureDebut: json['heureDebut'] ?? '',
+      heureDebutIsNight: json['heureDebutIsNight'] ?? false,
+      heureFin: json['heureFin'] ?? '',
+      heureFinIsNight: json['heureFinIsNight'] ?? false,
+      dateJournee: json['dateJournee'] ?? '',
+      totalHeure: json['totalHeure'] ?? '',
+      nombreEmployeeRequis: json['nombreEmployeeRequis'] ?? '',
+      shiftPrincipale: json['shiftPrincipale'] ?? '',
+      heureDebutModifier: json['heureDebutModifier'] ?? '',
+      heureDebutModifierIsNight: json['heureDebutModifierIsNight'] ?? false,
+      heureFinModifier: json['heureFinModifier'] ?? '',
+      heureFinModifierIsNight: json['heureFinModifierIsNight'] ?? false,
+      employee: EmployeeModel.fromJson(
+          json['employee']), // You might need to implement this
+      idPlanning: json['idPlanning'] ?? '',
+      idRestaurant: json['idRestaurant'] ?? '',
+      sign: json['sign'] ?? false,
+      heureDebutCheval: json['heureDebutCheval'] ?? '',
+      heureFinCheval: json['heureFinCheval'] ?? '',
+      heureDebutChevalIsNight: json['heureDebutChevalIsNight'] ?? false,
+      heureFinChevalIsNight: json['heureFinChevalIsNight'] ?? false,
+      acheval: json['acheval'] ?? '',
+      modifiable: json['modifiable'] ?? '',
+      dateInterval: json['dateInterval'] ?? '',
+    );
+  }
+
   factory ShiftModel.fromMap(Map<String, dynamic> map) {
     return ShiftModel(
       idShift: map['idShift'],
@@ -106,69 +192,14 @@ class ShiftModel {
       employee: EmployeeModel.fromMap(map['employee']),
       idPlanning: map['idPlanning'],
       idRestaurant: map['idRestaurant'],
-      // sign: map['sign'] ?? false,
+      sign: map['sign'] ?? false,
       heureDebutCheval: map['heureDebutCheval'],
       heureFinCheval: map['heureFinCheval'],
       heureDebutChevalIsNight: map['heureDebutChevalIsNight'],
       heureFinChevalIsNight: map['heureFinChevalIsNight'],
       acheval: map['acheval'],
-      modifiable: map['modifiable'], dateInterval: map['dateInterval'],
-    );
-  }
-  ShiftModel({
-    this.idShift,
-    this.idFront,
-    this.heureDebut,
-    this.heureDebutIsNight,
-    this.heureFin,
-    this.heureFinIsNight,
-    this.dateJournee,
-    this.totalHeure,
-    this.nombreEmployeeRequis,
-    this.shiftPrincipale,
-    this.heureDebutModifier,
-    this.heureDebutModifierIsNight,
-    this.heureFinModifier,
-    this.heureFinModifierIsNight,
-    this.employee,
-    this.idPlanning,
-    this.idRestaurant,
-    this.heureDebutCheval,
-    this.heureFinCheval,
-    this.heureDebutChevalIsNight,
-    this.heureFinChevalIsNight,
-    this.acheval,
-    this.modifiable,
-    required this.dateInterval,
-    sign,
-  });
-  factory ShiftModel.fromJson(Map<String, dynamic> json) {
-    return ShiftModel(
-      idShift: json['idShift'],
-      idFront: json['idFront'],
-      heureDebut: json['heureDebut'],
-      heureDebutIsNight: json['heureDebutIsNight'],
-      heureFin: json['heureFin'],
-      heureFinIsNight: json['heureFinIsNight'],
-      dateJournee: json['dateJournee'],
-      totalHeure: json['totalHeure'],
-      nombreEmployeeRequis: json['nombreEmployeeRequis'],
-      shiftPrincipale: json['shiftPrincipale'],
-      heureDebutModifier: json['heureDebutModifier'],
-      heureDebutModifierIsNight: json['heureDebutModifierIsNight'],
-      heureFinModifier: json['heureFinModifier'],
-      heureFinModifierIsNight: json['heureFinModifierIsNight'],
-      employee: EmployeeModel.fromJson(
-          json['employee']), // You might need to implement this
-      idPlanning: json['idPlanning'],
-      idRestaurant: json['idRestaurant'],
-      sign: json['sign'] ?? false,
-      heureDebutCheval: json['heureDebutCheval'],
-      heureFinCheval: json['heureFinCheval'],
-      heureDebutChevalIsNight: json['heureDebutChevalIsNight'],
-      heureFinChevalIsNight: json['heureFinChevalIsNight'],
-      acheval: json['acheval'],
-      modifiable: json['modifiable'], dateInterval: json['dateInterval'],
+      modifiable: map['modifiable'],
+      dateInterval: DateInterval.fromMap(map['dateInterval']),
     );
   }
 }

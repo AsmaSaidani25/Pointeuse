@@ -4,6 +4,7 @@ import 'package:pointeuse/View/LoginForm.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Model/AuthProvider.dart';
+import 'Services/Session.service.dart';
 import 'View/Navigation_Bar.dart';
 import 'View/Planing.dart';
 import 'View/Restaurant.dart';
@@ -12,7 +13,7 @@ import 'View/splash.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final sharedPreferences = await SharedPreferences.getInstance();
+  await SessionService.initialize();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.portraitUp,

@@ -2,53 +2,53 @@ import 'contraintes.sociale.model.dart';
 import 'enumeration/validationContrainteSociale.model.dart';
 
 class LoiPaysModel extends ContraintesSocialesModel {
-  String? valeurMajeurTempsPlein;
-  String? valeurMineurTempsPlein;
-  String? valeurMajeurTempsPartiel;
-  String? valeurMineurTempsPartiel;
-  String? valeurMajeurAfficher;
-  String? valeurMineurAfficher;
-  String? translatedLibelle;
-  bool mineurForbiddenChanges = false;
-  bool majeurForbiddenChanges = false;
-  bool? loiPointeuse;
+  late String valeurMajeurTempsPlein;
+  late String valeurMineurTempsPlein;
+  late String valeurMajeurTempsPartiel;
+  late String valeurMineurTempsPartiel;
+  late String valeurMajeurAfficher;
+  late String valeurMineurAfficher;
+  late String translatedLibelle;
+  late bool mineurForbiddenChanges = false;
+  late bool majeurForbiddenChanges = false;
+  late bool loiPointeuse;
   ValidationContrainteSocialeModel? validationContrainteSociale;
-  bool? isValid;
-  bool? isTime;
+  late bool isValid;
+  late bool isTime;
 
   LoiPaysModel({
-    this.valeurMajeurTempsPlein,
-    this.valeurMineurTempsPlein,
-    this.valeurMajeurTempsPartiel,
-    this.valeurMineurTempsPartiel,
-    this.valeurMajeurAfficher,
-    this.valeurMineurAfficher,
-    this.translatedLibelle,
-    this.loiPointeuse,
-    this.validationContrainteSociale,
-    this.isValid,
-    this.isTime,
+    valeurMajeurTempsPlein,
+    valeurMineurTempsPlein,
+    valeurMajeurTempsPartiel,
+    valeurMineurTempsPartiel,
+    valeurMajeurAfficher,
+    valeurMineurAfficher,
+    translatedLibelle,
+    loiPointeuse,
+    validationContrainteSociale,
+    isValid,
+    isTime,
     mineurForbiddenChanges,
     majeurForbiddenChanges,
   }) : super();
   factory LoiPaysModel.fromJson(Map<String, dynamic> map) {
     return LoiPaysModel(
-      valeurMajeurTempsPlein: map['valeurMajeurTempsPlein'],
-      valeurMineurTempsPlein: map['valeurMineurTempsPlein'],
-      valeurMajeurTempsPartiel: map['valeurMajeurTempsPartiel'],
-      valeurMineurTempsPartiel: map['valeurMineurTempsPartiel'],
-      valeurMajeurAfficher: map['valeurMajeurAfficher'],
-      valeurMineurAfficher: map['valeurMineurAfficher'],
-      translatedLibelle: map['translatedLibelle'],
-      mineurForbiddenChanges: map['mineurForbiddenChanges'],
-      majeurForbiddenChanges: map['majeurForbiddenChanges'],
-      loiPointeuse: map['loiPointeuse'],
+      valeurMajeurTempsPlein: map['valeurMajeurTempsPlein'] ?? '',
+      valeurMineurTempsPlein: map['valeurMineurTempsPlein'] ?? '',
+      valeurMajeurTempsPartiel: map['valeurMajeurTempsPartiel'] ?? '',
+      valeurMineurTempsPartiel: map['valeurMineurTempsPartiel'] ?? '',
+      valeurMajeurAfficher: map['valeurMajeurAfficher'] ?? '',
+      valeurMineurAfficher: map['valeurMineurAfficher'] ?? '',
+      translatedLibelle: map['translatedLibelle'] ?? '',
+      mineurForbiddenChanges: map['mineurForbiddenChanges'] ?? false,
+      majeurForbiddenChanges: map['majeurForbiddenChanges'] ?? false,
+      loiPointeuse: map['loiPointeuse'] ?? false,
       validationContrainteSociale: map['validationContrainteSociale'] != null
           ? ValidationContrainteSocialeModel.values.firstWhere(
               (e) => e.toString() == map['validationContrainteSociale'])
           : null,
-      isValid: map['isValid'],
-      isTime: map['isTime'],
+      isValid: map['isValid'] ?? false,
+      isTime: map['isTime'] ?? false,
     );
   }
   factory LoiPaysModel.fromMap(Map<String, dynamic> map) {

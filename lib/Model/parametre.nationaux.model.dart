@@ -2,28 +2,28 @@ import 'package:pointeuse/Model/enumeration/jour.semaine.dart';
 
 class ParametreNationauxModel {
   int? idParametreNationaux;
-  bool? payerLeBreak;
-  bool? inactiviteEstBreak;
-  dynamic dureePref;
-  dynamic dureeMin;
-  JourSemaine? premierJourSemaine;
-  JourSemaine? premierJourWeekend;
-  JourSemaine? dernierJourWeekend;
-  dynamic heureDebutWeekend;
-  dynamic heureFinWeekend;
-  dynamic dureeShift1;
-  dynamic dureeShift2;
-  dynamic dureeShift3;
-  dynamic dureeBreak1;
-  dynamic dureeBreak2;
-  dynamic dureeBreak3;
-  int? ageJeuneFeminin;
-  int? ageJeuneMasculin;
+  late bool payerLeBreak;
+  late bool inactiviteEstBreak;
+  late dynamic dureePref;
+  late dynamic dureeMin;
+  late JourSemaine? premierJourSemaine;
+  late JourSemaine? premierJourWeekend;
+  late JourSemaine? dernierJourWeekend;
+  late dynamic heureDebutWeekend;
+  late dynamic heureFinWeekend;
+  late dynamic dureeShift1;
+  late dynamic dureeShift2;
+  late dynamic dureeShift3;
+  late dynamic dureeBreak1;
+  late dynamic dureeBreak2;
+  late dynamic dureeBreak3;
+  late int ageJeuneFeminin;
+  late int ageJeuneMasculin;
 
   ParametreNationauxModel({
     this.idParametreNationaux,
-    this.payerLeBreak,
-    this.inactiviteEstBreak,
+    required this.payerLeBreak,
+    required this.inactiviteEstBreak,
     this.dureePref,
     this.dureeMin,
     this.premierJourSemaine,
@@ -37,8 +37,8 @@ class ParametreNationauxModel {
     this.dureeBreak1,
     this.dureeBreak2,
     this.dureeBreak3,
-    this.ageJeuneFeminin,
-    this.ageJeuneMasculin,
+    required this.ageJeuneFeminin,
+    required this.ageJeuneMasculin,
   });
 
   Map<String, dynamic> toJson() {
@@ -95,35 +95,39 @@ class ParametreNationauxModel {
   }
   factory ParametreNationauxModel.fromJson(Map<String, dynamic> map) {
     return ParametreNationauxModel(
-      idParametreNationaux: map['idParametreNationaux'],
-      payerLeBreak: map['payerLeBreak'],
-      inactiviteEstBreak: map['inactiviteEstBreak'],
-      dureePref: map['dureePref'],
-      dureeMin: map['dureeMin'],
+      idParametreNationaux: map['idParametreNationaux'] ?? '',
+      payerLeBreak: map['payerLeBreak'] ?? false,
+      inactiviteEstBreak: map['inactiviteEstBreak'] ?? false,
+      dureePref: map['dureePref'] as String? ?? '',
+      dureeMin: map['dureeMin'] as String? ?? '',
       premierJourSemaine: map['premierJourSemaine'] != null
-          ? JourSemaine.values
-              .firstWhere((e) => e.toString() == map['premierJourSemaine'])
+          ? JourSemaine.values.firstWhere(
+              (e) => e.toString() == 'JourSemaine.${map['premierJourSemaine']}',
+            )
           : null,
       premierJourWeekend: map['premierJourWeekend'] != null
-          ? JourSemaine.values
-              .firstWhere((e) => e.toString() == map['premierJourWeekend'])
+          ? JourSemaine.values.firstWhere(
+              (e) => e.toString() == 'JourSemaine.${map['premierJourWeekend']}',
+            )
           : null,
       dernierJourWeekend: map['dernierJourWeekend'] != null
-          ? JourSemaine.values
-              .firstWhere((e) => e.toString() == map['dernierJourWeekend'])
+          ? JourSemaine.values.firstWhere(
+              (e) => e.toString() == 'JourSemaine.${map['dernierJourWeekend']}',
+            )
           : null,
-      heureDebutWeekend: map['heureDebutWeekend'],
-      heureFinWeekend: map['heureFinWeekend'],
-      dureeShift1: map['dureeShift1'],
-      dureeShift2: map['dureeShift2'],
-      dureeShift3: map['dureeShift3'],
-      dureeBreak1: map['dureeBreak1'],
-      dureeBreak2: map['dureeBreak2'],
-      dureeBreak3: map['dureeBreak3'],
-      ageJeuneFeminin: map['ageJeuneFeminin'],
-      ageJeuneMasculin: map['ageJeuneMasculin'],
+      heureDebutWeekend: map['heureDebutWeekend'] as String? ?? '',
+      heureFinWeekend: map['heureFinWeekend'] as String? ?? '',
+      dureeShift1: map['dureeShift1'] as String? ?? '',
+      dureeShift2: map['dureeShift2'] as String? ?? '',
+      dureeShift3: map['dureeShift3'] as String? ?? '',
+      dureeBreak1: map['dureeBreak1'] as String? ?? '',
+      dureeBreak2: map['dureeBreak2'] as String? ?? '',
+      dureeBreak3: map['dureeBreak3'] as String? ?? '',
+      ageJeuneFeminin: map['ageJeuneFeminin'] ?? '',
+      ageJeuneMasculin: map['ageJeuneMasculin'] ?? '',
     );
   }
+
   Map<String, dynamic> toMap() {
     return {
       'idParametreNationaux': idParametreNationaux,

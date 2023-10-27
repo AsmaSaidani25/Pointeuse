@@ -1,23 +1,53 @@
+import 'package:path/path.dart';
 import 'package:pointeuse/Model/decoupage.horaire.model.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
 
 class DecoupageHoraireJsStoreService {
-  static Database? _database;
+  Database? _database;
   static const String tableName = 'decoupage';
+
+  DecoupageHoraireJsStoreService(Database database) {
+    this._database = database;
+  }
 
   Future<Database?> get database async {
     if (_database != null) return _database;
 
-    // Open the database (create if it doesn't exist)
     _database = await openDatabase(
       join(await getDatabasesPath(), '_database.db'),
       onCreate: (db, version) {
-        // Create tables if they don't exist
         db.execute(
           'CREATE TABLE IF NOT EXISTS $tableName ('
           'id INTEGER PRIMARY KEY AUTOINCREMENT,'
-          // Define your table columns here
+          'idDecoupageHoraire INTEGER,'
+          'valeurDimanche TEXT,'
+          'valeurDimancheIsNight INTEGER,'
+          'valeurDimancheIsNew INTEGER,'
+          'idFront TEXT,'
+          'valeurLundi TEXT,'
+          'valeurLundiIsNight INTEGER,'
+          'valeurLundiIsNew INTEGER,'
+          'valeurMardi TEXT,'
+          'valeurMardiIsNight INTEGER,'
+          'valeurMardiIsNew INTEGER,'
+          'valeurMercredi TEXT,'
+          'valeurMercrediIsNight INTEGER,'
+          'valeurMercrediIsNew INTEGER,'
+          'valeurJeudi TEXT,'
+          'valeurJeudiIsNight INTEGER,'
+          'valeurJeudiIsNew INTEGER,'
+          'valeurVendredi TEXT,'
+          'valeurVendrediIsNight INTEGER,'
+          'valeurVendrediIsNew INTEGER,'
+          'valeurSamedi TEXT,'
+          'valeurSamediIsNight INTEGER,'
+          'valeurSamediIsNew INTEGER,'
+          'hasCorrectValue INTEGER,'
+          'isVisited INTEGER,'
+          'canDelete INTEGER,'
+          'debut TEXT,'
+          'fin TEXT,'
+          'phaseLibelle TEXT'
           ')',
         );
       },
@@ -27,19 +57,92 @@ class DecoupageHoraireJsStoreService {
     return _database;
   }
 
+  Future<void> createTable() async {
+    final db = await database;
+    if (db != null) {
+      await db.execute(
+        'CREATE TABLE IF NOT EXISTS $tableName ('
+        'id INTEGER PRIMARY KEY AUTOINCREMENT,'
+        'idDecoupageHoraire INTEGER,'
+        'valeurDimanche TEXT,'
+        'valeurDimancheIsNight INTEGER,'
+        'valeurDimancheIsNew INTEGER,'
+        'idFront TEXT,'
+        'valeurLundi TEXT,'
+        'valeurLundiIsNight INTEGER,'
+        'valeurLundiIsNew INTEGER,'
+        'valeurMardi TEXT,'
+        'valeurMardiIsNight INTEGER,'
+        'valeurMardiIsNew INTEGER,'
+        'valeurMercredi TEXT,'
+        'valeurMercrediIsNight INTEGER,'
+        'valeurMercrediIsNew INTEGER,'
+        'valeurJeudi TEXT,'
+        'valeurJeudiIsNight INTEGER,'
+        'valeurJeudiIsNew INTEGER,'
+        'valeurVendredi TEXT,'
+        'valeurVendrediIsNight INTEGER,'
+        'valeurVendrediIsNew INTEGER,'
+        'valeurSamedi TEXT,'
+        'valeurSamediIsNight INTEGER,'
+        'valeurSamediIsNew INTEGER,'
+        'hasCorrectValue INTEGER,'
+        'isVisited INTEGER,'
+        'canDelete INTEGER,'
+        'debut TEXT,'
+        'fin TEXT,'
+        'phaseLibelle TEXT'
+        ')',
+      );
+    } else {
+      throw Exception('Database is null');
+    }
+  }
+
+  Future<void> terminateInstance() async {
+    _database?.close();
+  }
+
   Future<int> addDecoupage(DecoupageHoraireModel entity) async {
-    final _database = await database;
-    return await _database!.insert(tableName, entity.toMap());
+    var db = await _database;
+    if (db != null) {
+      return await db.transaction((txn) async {
+        int result = await txn.insert(tableName, entity.toMap());
+        return result;
+      });
+    } else {
+      throw Exception('Database is null');
+    }
   }
 
-  Future<List<DecoupageHoraireModel>?> getListDecoupage() async {
-    final _database = await database;
-    final results = await _database!.query(tableName);
-    return results.map((map) => DecoupageHoraireModel.fromMap(map)).toList();
+  Future<List<DecoupageHoraireModel>> getListDecoupage() async {
+    final db = await _database;
+    if (db != null) {
+      final results = await db.query(tableName);
+      return results.map((map) => DecoupageHoraireModel.fromMap(map)).toList();
+    } else {
+      throw Exception('Database is null');
+    }
   }
 
-  Future<void> clearData() async {
-    final _database = await database;
-    await _database!.delete(tableName);
+  Future<bool> clearData() async {
+    final db = await _database;
+    if (db == null) {
+      throw Exception('Database is null');
+      return false;
+    } else {
+      await db.delete(tableName);
+      return true;
+    }
+  }
+
+  Future<bool> tableExists(String tableName) async {
+    final List<Map<String, dynamic>> tables = await _database!.query(
+      'sqlite_master',
+      columns: ['name'],
+      where: 'type = ? AND name = ?',
+      whereArgs: ['table', tableName],
+    );
+    return tables.isNotEmpty;
   }
 }

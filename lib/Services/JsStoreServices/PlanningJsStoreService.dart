@@ -82,7 +82,7 @@ class PlaningJsStoreService extends DbJsStoreService {
   static Future<List<PointageModel>> getAllPointage() async {
     PlaningJsStoreService instance = PlaningJsStoreService();
 
-    final List<Map<String, dynamic>> results = await instance._database!.query(
+    final List<Map<String, dynamic>> results = await instance._database.query(
       NameOfTable.POINTAGE,
     );
 
@@ -100,7 +100,7 @@ class PlaningJsStoreService extends DbJsStoreService {
       pointageList.forEach((pointage) {
         final d = DateTime.parse(pointage.dateJournee);
         if (d.isBefore(dateMinusTwoMonths)) {
-          instance._database!.delete(
+          instance._database.delete(
             NameOfTable.POINTAGE,
             where: 'idFront = ?',
             whereArgs: [pointage.idFront],

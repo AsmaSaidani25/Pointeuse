@@ -1,58 +1,44 @@
 import 'package:pointeuse/Model/enumeration/NameOfTable.enum.dart';
+import 'package:pointeuse/Model/shift.model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class ShiftJsStoreService {
   late final Database _database;
+
   // final BehaviorSubject<bool> _synchronisedSubject = BehaviorSubject<bool>();
 
-  Future<Database> _initializeDatabase() async {
-    // Replace with your database initialization logic here
-    final dbPath = await getDatabasesPath();
-    final databasePath = join(dbPath, '_database.db');
+  static final String tableName = NameOfTable.SHIFT;
 
-    final database = await openDatabase(
-      databasePath,
-      onCreate: (db, version) {
-        // Define your table creation logic here
-        db.execute(
-          'CREATE TABLE IF NOT EXISTS $tableName ('
-          // Define your table columns here
-          ')',
-        );
-      },
-      version: 1,
-    );
+  static Future<int> addShift(Map<String, dynamic> entity) async {
+    ShiftJsStoreService instance = ShiftJsStoreService();
 
-    return database;
+    return instance._database.insert(tableName, entity);
   }
 
-  final String tableName =
-      NameOfTable.SHIFT; // Replace with your actual table name
+  static Future<List<Map<String, dynamic>>?> getShiftList() async {
+    ShiftJsStoreService instance = ShiftJsStoreService();
 
-  ShiftJsStoreService(Database database) {
-    _database = database;
+    return instance._database.query(tableName);
   }
 
-  Future<int> addShift(Map<String, dynamic> entity) async {
-    return _database.insert(tableName, entity);
-  }
+  static Future<List<ShiftModel>> getByDateJournee(String dateJournee) async {
+    ShiftJsStoreService instance = ShiftJsStoreService();
 
-  Future<List<Map<String, dynamic>>> getShiftList() async {
-    return _database.query(tableName);
-  }
-
-  Future<List<Map<String, dynamic>>> getByDateJournee(
-      String dateJournee) async {
-    return _database.query(
-      tableName,
+    final List<Map<String, dynamic>> results = await instance._database.query(
+      NameOfTable.SHIFT,
       where: 'dateJournee = ?',
       whereArgs: [dateJournee],
     );
+    List<ShiftModel> resultList =
+        results.map((result) => ShiftModel.fromMap(result)).toList();
+
+    return resultList;
   }
 
-  Future<int> clearData() async {
-    return _database.delete(tableName);
+  static Future<int> clearData() async {
+    ShiftJsStoreService instance = ShiftJsStoreService();
+    return instance._database.delete(tableName);
   }
 
   /* void setSynchronisedListShift(bool synchronised) {

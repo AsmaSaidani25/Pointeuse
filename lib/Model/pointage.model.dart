@@ -1,45 +1,45 @@
 import 'package:pointeuse/Model/type.pointage.model.dart';
 
 class PointageModel {
-  int? idEmployee;
-  int? idShift;
-  String idFront;
-  dynamic dateJournee;
-  dynamic heureDebut;
-  bool heureDebutIsNight;
-  dynamic heureFin;
-  bool heureFinIsNight;
-  int? tempsPointes;
-  TypePointageModel? typePointageRef;
-  int? modified;
-  dynamic creationDate;
-  int? idRestaurant;
-  int? voucherPrintState;
-  bool? isAcheval;
-  dynamic heureDebutAcheval;
-  bool? heureDebutAchevalIsNight;
-  int idTypePointageRef;
+  late int? idEmployee;
+  late int? idShift;
+  late String idFront;
+  late dynamic dateJournee;
+  late dynamic heureDebut;
+  late bool heureDebutIsNight;
+  late dynamic heureFin;
+  late bool heureFinIsNight;
+  late int tempsPointes;
+  late TypePointageModel? typePointageRef;
+  late int modified;
+  late dynamic creationDate;
+  late int? idRestaurant;
+  late int voucherPrintState;
+  late bool isAcheval;
+  late dynamic heureDebutAcheval;
+  late bool heureDebutAchevalIsNight;
+  late int idTypePointageRef;
 
   // Constructor
   PointageModel(
       {this.idEmployee,
       this.idShift,
-      required this.idFront,
+      idFront,
       this.dateJournee,
       this.heureDebut,
-      required this.heureDebutIsNight,
+      heureDebutIsNight,
       this.heureFin,
-      required this.heureFinIsNight,
-      this.tempsPointes,
+      heureFinIsNight,
+      tempsPointes,
       this.typePointageRef,
-      this.modified,
+      modified,
       this.creationDate,
       this.idRestaurant,
-      this.voucherPrintState,
-      this.isAcheval,
+      voucherPrintState,
+      isAcheval,
       this.heureDebutAcheval,
-      this.heureDebutAchevalIsNight,
-      required this.idTypePointageRef});
+      heureDebutAchevalIsNight,
+      idTypePointageRef});
 
   // Convert Map to PointageModel
   factory PointageModel.fromMap(Map<String, dynamic> map) {
@@ -67,24 +67,24 @@ class PointageModel {
 
   factory PointageModel.fromJson(Map<String, dynamic> json) {
     return PointageModel(
-      idEmployee: json['idEmployee'],
-      idShift: json['idShift'],
-      idFront: json['idFront'],
-      dateJournee: json['dateJournee'],
-      heureDebut: json['heureDebut'],
-      heureDebutIsNight: json['heureDebutIsNight'],
-      heureFin: json['heureFin'],
-      heureFinIsNight: json['heureFinIsNight'],
-      tempsPointes: json['tempsPointes'],
-      typePointageRef: json['typePointageRef'],
-      modified: json['modified'],
-      creationDate: json['creationDate'],
-      idRestaurant: json['idRestaurant'],
-      voucherPrintState: json['voucherPrintState'],
-      isAcheval: json['isAcheval'],
-      heureDebutAcheval: json['heureDebutAcheval'],
-      heureDebutAchevalIsNight: json['heureDebutAchevalIsNight'],
-      idTypePointageRef: json['idTypePointageRef'],
+      idEmployee: json['idEmployee'] ?? '',
+      idShift: json['idShift'] ?? '',
+      idFront: json['idFront'] ?? '',
+      dateJournee: json['dateJournee'] ?? '',
+      heureDebut: json['heureDebut'] ?? '',
+      heureDebutIsNight: json['heureDebutIsNight'] ?? false,
+      heureFin: json['heureFin'] ?? '',
+      heureFinIsNight: json['heureFinIsNight'] ?? false,
+      tempsPointes: json['tempsPointes'] ?? '',
+      typePointageRef: json['typePointageRef'] ?? '',
+      modified: json['modified'] ?? '',
+      creationDate: json['creationDate'] ?? '',
+      idRestaurant: json['idRestaurant'] ?? '',
+      voucherPrintState: json['voucherPrintState'] ?? '',
+      isAcheval: json['isAcheval'] ?? false,
+      heureDebutAcheval: json['heureDebutAcheval'] ?? '',
+      heureDebutAchevalIsNight: json['heureDebutAchevalIsNight'] ?? false,
+      idTypePointageRef: json['idTypePointageRef'] ?? '',
     );
   }
 

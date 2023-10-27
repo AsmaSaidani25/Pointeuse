@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
 import 'package:pointeuse/Model/CorrectionPointage.dart';
 import 'package:pointeuse/Model/anomalie.model.dart';
@@ -18,20 +19,20 @@ import 'package:pointeuse/Model/shift.model.dart';
 import 'package:pointeuse/Model/type.pointage.model.dart';
 import 'package:pointeuse/Services/AnomalieService.dart';
 import 'package:pointeuse/Services/ContrainteSocialeService.dart';
+import 'package:pointeuse/Services/JsStoreServices/type-pointage-js-store.service.dart';
 import 'package:pointeuse/Services/PlanningService.dart';
 import 'package:pointeuse/Services/Session.service.dart';
 import 'package:pointeuse/Services/UpdateHeaderAnomalieService.dart';
-import 'package:pointeuse/Services/JsStoreServices/type-pointage-js-store.service.dart';
 import 'package:pointeuse/Services/dateService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:pointeuse/DatabaseHandler/DatabaseHelper.dart';
 import 'AlarmProvider.dart';
-import 'CheckingSocialConstraintsRegularlyService.dart';
 import 'DecoupageHoraireService.dart';
+import 'EmployeeService.dart';
 import 'JsStoreServices/AnomalieJsStoreService.dart';
 import 'JsStoreServices/CorrectionPointageJsStoreService.dart';
 import 'JsStoreServices/EmployeJsStoreService.dart';
-import 'EmployeeService.dart';
 import 'JsStoreServices/MessageJsStoreService.dart';
 import 'JsStoreServices/ParametreJsStoreService.dart';
 import 'JsStoreServices/PlanningJsStoreService.dart';
@@ -39,6 +40,7 @@ import 'JsStoreServices/ShiftJsStoreService.dart';
 import 'JsStoreServices/decoupageHoraireJsStore.service.dart';
 import 'JsStoreServices/infoRestaurantJsStore.service.dart';
 import 'MessageService.dart';
+import 'NotificationService.dart';
 import 'OnlineService.dart';
 import 'ParametreService.dart';
 import 'PointingService.dart';
@@ -47,16 +49,6 @@ import 'Session.service.dart';
 import 'ShiftService.dart';
 import 'TypePointageService.dart';
 import 'dateService.dart';
-
-enum JourSemaine {
-  LUNDI,
-  MARDI,
-  MERCREDI,
-  JEUDI,
-  VENDREDI,
-  SAMEDI,
-  DIMANCHE,
-}
 
 class RestaurantDataService {
   SharedPreferences sharedPreferences;
@@ -73,31 +65,33 @@ class RestaurantDataService {
   final EmployeJsStoreService employeJsStoreService;
   final InfoRestaurantJsStoreService infoRestaurantJsStoreService;
   final MessageJsStoreService messageJsStoreService;
-  final ParametreJsStoreService parameterJsStoreService;
   final TypePointageJsStoreService typePointageJsStoreService;
   final RestaurantService restaurantService;
-  final CheckingSocialConstraintsRegularlyService
-      checkingSocialConstraintsRegularlyService;
+
+  // final CheckingSocialConstraintsRegularlyService checkingSocialConstraintsRegularlyService;
   final DateService dateHelperService;
   final ContrainteSocialeService contrainteSocialeService;
   final OnlineService onlineService;
-  final listDecoupageHoraire = <dynamic>[];
+  static final listDecoupageHoraire = <dynamic>[];
   final listMessage = <dynamic>[];
   final listShift = <dynamic>[];
-  final listPointage = <dynamic>[];
-  final listAnomalie = <AnomalieModel>[];
-  late var listPointageFromIndexDb = <PointageModel>[];
+  static final listPointage = <dynamic>[];
+  static final listAnomalie = <AnomalieModel>[];
+  static late var listPointageFromIndexDb = <PointageModel>[];
   final ONE_DAY_AS_MILLISECONDS = 86400000;
-  final param = 'CORRECTPRNAUTO';
+  static final param = 'CORRECTPRNAUTO';
   final paramMode24 = 'MODE_24H';
   final paramPret = 'PRET_SALARIE';
-  late var paramatere = <ParametreModel>[];
+  static late var paramatere = <ParametreModel>[];
   final pretedEmployeeIdList = <int>[];
-  bool isOnline = true;
+
+  // bool isOnline = true;
   final tableNameEmployee = NameOfTable.EMPLOYEE;
   final tableNameShift = NameOfTable.SHIFT;
-  final tableNamePointage = NameOfTable.POINTAGE;
-  int idRestaurant;
+  static final tableNamePointage = NameOfTable.POINTAGE;
+  static late int idRestaurant;
+  static String? codeRestaurant = '';
+  final DatabaseHelper databaseHelper;
 
   RestaurantDataService(
     this.employeeService,
@@ -112,25 +106,19 @@ class RestaurantDataService {
     this.employeJsStoreService,
     this.infoRestaurantJsStoreService,
     this.messageJsStoreService,
-    this.parameterJsStoreService,
     this.typePointageJsStoreService,
     this.restaurantService,
-    this.checkingSocialConstraintsRegularlyService,
+    //this.checkingSocialConstraintsRegularlyService,
     this.dateService,
     this.dateHelperService,
     this.contrainteSocialeService,
     this.onlineService,
-    this.idRestaurant,
+    // this.idRestaurant,
     this.sharedPreferences,
-  ) {
-    checkOnlineState();
-  }
+    this.databaseHelper,
+  ) {}
 
-  void checkOnlineState() {
-    OnlineService.onlineState().listen((isOnline) => this.isOnline = isOnline);
-  }
-
-  String makeString() {
+  static String makeString() {
     String outString = '';
     const inOptions = 'abcdefghijklmnopqrstuvwxyz0123456789';
     for (int i = 0; i < 32; i++) {
@@ -139,14 +127,14 @@ class RestaurantDataService {
     return outString;
   }
 
-  Future<void> savePretedEmployeeIds(List<int> employeeIds) async {
+  static Future<void> savePretedEmployeeIds(List<int> employeeIds) async {
     final sharedPreferences = await SharedPreferences.getInstance();
     final stringList = employeeIds.map((id) => id.toString()).toList();
     await sharedPreferences.setStringList('pretedEmployeeIds', stringList);
   }
 
-  Future<void> getEmployeePreteAndSaveToLocalBase(
-      EmployePointeuseDTO employeeDto, int idRestaurant) async {
+  static Future<void> getEmployeePreteAndSaveToLocalBase(
+      EmployePointeuseDTO employeeDto, String idRestaurant) async {
     await EmployeJsStoreService.deleteEmployeePrete(
         NameOfTable.EMPLOYEE, idRestaurant);
     final pretedEmployeeIdList = <int>[];
@@ -156,15 +144,15 @@ class RestaurantDataService {
       employeeDto.employeeList[i].idFront = makeString();
 
       // Assuming employeJsStoreService.addEmployee is an async method
-      await employeJsStoreService.addEmployee(employeeDto.employeeList[i]);
+      await EmployeJsStoreService.addEmployee(employeeDto.employeeList[i]);
     }
 
     // Save pretedEmployeeIdList to SharedPreferences
     await savePretedEmployeeIds(pretedEmployeeIdList);
   }
 
-  Future<void> getPointagesPretsAndSaveToLocalBase(
-      employeeDto, int idRestaurant) async {
+  static Future<void> getPointagesPretsAndSaveToLocalBase(
+      employeeDto, String idRestaurant) async {
     final List<Map<String, dynamic>> pointageList = employeeDto.pointageList;
 
     final prefs = await SharedPreferences.getInstance();
@@ -212,8 +200,8 @@ class RestaurantDataService {
 
         final typePointageService = TypePointageJsStoreService();
 
-        final typePointageRef = await typePointageService
-            .getOneById(pointageData['typePointageRef']['id']);
+        final typePointageRef = await TypePointageJsStoreService.getOneById(
+            pointageData['typePointageRef']['id']);
         pointage.typePointageRef = typePointageRef as TypePointageModel?;
 
         await PlaningJsStoreService.addPointage(pointage);
@@ -222,7 +210,7 @@ class RestaurantDataService {
     }
   }
 
-  Future<Database> _initializeDatabase() async {
+  static Future<Database> _initializeDatabase() async {
     // Replace with your database initialization logic here
     final dbPath = await getDatabasesPath();
     final databasePath = join(dbPath, '_database.db');
@@ -243,8 +231,8 @@ class RestaurantDataService {
     return database;
   }
 
-  Future<void> getShiftPretAndSaveToLocalBase(
-      employeeDto, int idRestaurant) async {
+  static Future<void> getShiftPretAndSaveToLocalBase(
+      employeeDto, String idRestaurant) async {
     // Define your table name and other variables here
     String tableNameShift = "your_table_name";
 
@@ -252,10 +240,9 @@ class RestaurantDataService {
         tableNameShift, idRestaurant);
 
     final Database database = await _initializeDatabase();
-    final shiftService = ShiftJsStoreService(database);
 
-    final List<Map<String, dynamic>> shiftsData =
-        await shiftService.getShiftList();
+    final List<Map<String, dynamic>>? shiftsData =
+        await ShiftJsStoreService.getShiftList();
 
     if (employeeDto['shiftList'].isNotEmpty) {
       for (var item in employeeDto['shiftList']) {
@@ -265,25 +252,26 @@ class RestaurantDataService {
         final shiftMap = shift.toMap();
 
         final indexShift =
-            shiftsData.indexWhere((map) => map['shiftId'] == shift.idShift);
+            shiftsData!.indexWhere((map) => map['shiftId'] == shift.idShift);
 
         if (indexShift == -1) {
           // Shift doesn't exist in shiftsData, add it
           shiftMap['idFront'] = makeString();
-          await shiftService.addShift(shiftMap);
+          await ShiftJsStoreService.addShift(shiftMap);
         }
       }
     }
   }
 
-  Future<void> getEmployePreteActifAndShiftAndPointage(int idRestaurant) async {
+  static Future<void> getEmployePreteActifAndShiftAndPointage(
+      String idRestaurant) async {
     // Set employee prete in indexedDB
     EmployePointeuseDTO employeesDto = EmployePointeuseDTO(
         pointageList: [],
         employeeList: [],
         shiftList: []); // Initialize with default values
     try {
-      final response = await employeeService
+      final response = await EmployeeService
           .getEmployePreteActifAndShiftAndPointageByIdRestaurantAndDateJournee(
               idRestaurant);
       if (response.statusCode == 200) {
@@ -306,12 +294,12 @@ class RestaurantDataService {
     }
   }
 
-  Future<void> synchronisePrametre() async {
+  static Future<void> synchronisePrametre() async {
     List<ParametreModel> parametres =
-        await parameterJsStoreService.getListParameter();
+        await ParametreJsStoreService.getListParameter();
     ParametreService parametreService =
         ParametreService(); // Create an instance
-    int? restaurantId = await SessionService.getIdRestaurant();
+    String? restaurantId = (await SessionService.getIdRestaurant()) as String?;
     if (restaurantId != null) {
       await parametreService.updateParamsByRestaurant(parametres, restaurantId);
     } else {
@@ -319,13 +307,11 @@ class RestaurantDataService {
     }
   }
 
-  Future<void> getParametreByparam() async {
-    if (isOnline) {
-      await synchronisePrametre();
-    }
+  static Future<void> getParametreByparam() async {
+    await synchronisePrametre();
   }
 
-  Future<void> synchronisePointage(String dateJournee) async {
+  static Future<void> synchronisePointage(String dateJournee) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     // Assuming PointageModel is a class representing your data
@@ -338,7 +324,7 @@ class RestaurantDataService {
     await PlaningJsStoreService.deleteAllPointageBefore2Months();
   }
 
-  Future<void> verifyExitPointing(
+  static Future<void> verifyExitPointing(
       DateTime dateFinActivity, bool isNight, String dateJournee) async {
     for (int i = 0; i < listPointageFromIndexDb.length; i++) {
       if (listPointageFromIndexDb[i].heureFin == null) {
@@ -346,28 +332,24 @@ class RestaurantDataService {
             listPointageFromIndexDb[i], dateFinActivity, isNight, dateJournee);
       }
     }
-    if (isOnline) {
-      await synchronisePointage(dateJournee);
-    }
+    await synchronisePointage(dateJournee);
   }
 
-  Future<void> getListPointage(
+  static Future<void> getListPointage(
       DateTime dateFinActivity, bool isNight, String dateJournee) async {
     listPointageFromIndexDb =
         await PointingService.getDailyPointages(dateJournee);
     await verifyExitPointing(dateFinActivity, isNight, dateJournee);
   }
 
-  Future<void> updatePointing(
+  static Future<void> updatePointing(
       DateTime dateFinActivity, bool isNight, String dateJournee) async {
-    if (isOnline) {
-      paramatere = await ParametreJsStoreService.getParamatreByParam(param)
-          as List<ParametreModel>; // Removed unnecessary await
-      await getListPointage(dateFinActivity, isNight, dateJournee);
-    }
+    paramatere = await ParametreJsStoreService.getParamatreByParam(param)
+        as List<ParametreModel>; // Removed unnecessary await
+    await getListPointage(dateFinActivity, isNight, dateJournee);
   }
 
-  Future<void> addCorrectionPointage(PointageModel pointage,
+  static Future<void> addCorrectionPointage(PointageModel pointage,
       EntityAction entityAction, String dateJournee) async {
     final employee = await EmployeJsStoreService.getEmployesByIdEmployee(
         pointage.idEmployee);
@@ -412,7 +394,7 @@ class RestaurantDataService {
     await CorrectionPointageService.addCorrection(correctionPointage);
   }
 
-  Future<void> updateOrDeletePointage(PointageModel pointage,
+  static Future<void> updateOrDeletePointage(PointageModel pointage,
       DateTime dateFinActivity, bool isNight, String dateJournee) async {
     final paramatere = await ParametreJsStoreService.getParamatreByParam(param);
     final dateInterval = DateInterval(
@@ -446,13 +428,13 @@ class RestaurantDataService {
         pointage.heureFinIsNight = await ContrainteSocialeService.checkIsNight(
             DateTime(datFin.year, datFin.month, datFin.day, datFin.hour,
                 datFin.minute - 1),
-            dateService.getCorrectDateJournee());
+            DateService.getCorrectDateJournee());
 
         pointage.tempsPointes = DateService.getTotalMinutes(dateInterval);
         pointage.modified = 2;
 
         await PointingService.updatePointage(pointage);
-        await addCorrectionPointage(
+        await RestaurantDataService.addCorrectionPointage(
             pointage, EntityAction.MODIFICATION, dateJournee);
       } else if (valeur == '0') {
         await PointingService.deletePointage(pointage.idFront);
@@ -462,7 +444,7 @@ class RestaurantDataService {
     }
   }
 
-  Future<void> setDateJourneeAndOuvertureFermetureTimer() async {
+  static Future<void> setDateJourneeAndOuvertureFermetureTimer() async {
     DateTime currentDate = DateTime.now();
     DecoupageHoraireModel currentDayDecoupage = DecoupageHoraireModel(
       idDecoupageHoraire: 1,
@@ -490,13 +472,14 @@ class RestaurantDataService {
       // Provide a DateTime value for debut
       fin: DateTime.now(), // Provide a DateTime value for fin
     );
-    currentDayDecoupage.debut = // Assign a DateTime value to debut
-        currentDayDecoupage.fin = currentDate = currentDate.subtract(Duration(
+    currentDayDecoupage.debut = currentDayDecoupage.fin = currentDate =
+        currentDate.subtract(Duration(
             seconds: currentDate.second,
             milliseconds: currentDate.millisecond));
     final Duration ONE_DAY_AS_DURATION = Duration(days: 1);
     final DateTime previousDate = currentDate.subtract(ONE_DAY_AS_DURATION);
     final DateTime nextDate = currentDate.add(ONE_DAY_AS_DURATION);
+    final database = await DatabaseHelper.getDatabase();
 
     final JourSemaine currentDay =
         DateService.getJourSemaine(currentDate) as JourSemaine;
@@ -507,9 +490,10 @@ class RestaurantDataService {
     final JourSemaine afterNextDay =
         DateService.getJourSemaine(nextDate.add(ONE_DAY_AS_DURATION))
             as JourSemaine;
+    final dbService = DecoupageHoraireJsStoreService(database);
 
     final List<DecoupageHoraireModel>? listDecoupageHoraire =
-        await this.decoupageHoraireJsStoreService.getListDecoupage();
+        await dbService.getListDecoupage();
 
     // DJA = Debut Journee Activite
     final DecoupageHoraireModel debutJournee =
@@ -530,8 +514,8 @@ class RestaurantDataService {
         afterNextDay.toString(), 2, debutJournee, finJournee);
     if (currentDate.isAfter(currentDayDecoupage.debut) &&
         currentDate.isBefore(currentDayDecoupage.fin)) {
-      SessionService.setDateJournee(currentDate);
-      SessionService.setJournee(currentDay.toString());
+      await SessionService.setDateJournee(currentDate);
+      await SessionService.setJournee(currentDay.toString());
       SessionService.setDebutJournee(currentDayDecoupage.debut);
       SessionService.setFinJournee(currentDayDecoupage.fin);
       final alarmProvider = AlarmProvider();
@@ -540,53 +524,76 @@ class RestaurantDataService {
         'fermetureAutomatiquePointese',
         currentDayDecoupage.fin,
         () async {
-          final dateJournee = DateTime.parse(SessionService.getDateJournee());
-          await this.updatePointing(
+          final dateJournee =
+              DateTime.parse(await SessionService.getDateJournee());
+          await RestaurantDataService.updatePointing(
             currentDayDecoupage.fin,
             finJournee[
                 'valeur${DateService.convertStringToCamelCase(currentDay.toString())}IsNight'],
             dateJournee.toString(), // Convert DateTime to String
           );
-          SessionService.setPointeuseState(false);
-          this.checkingSocialConstraintsRegularlyService.stopAudio();
-          this.checkingSocialConstraintsRegularlyService.stopPreAlarme();
-          await this.getParametreByparam();
+          await SessionService.setPointeuseState(false);
+          // this.checkingSocialConstraintsRegularlyService.stopAudio();
+          // this.checkingSocialConstraintsRegularlyService.stopPreAlarme();
+          await RestaurantDataService.getParametreByparam();
         },
       );
       SessionService.setDateProchFermeture(currentDayDecoupage.fin);
     }
   }
 
-  Future<void> getDecopageHoraireAndSaveToLocalBase(int idRestaurant) async {
-    if (isOnline) {
+  static Future<void> getDecopageHoraireAndSaveToLocalBase(
+      String idRestaurant) async {
+    final database = await DatabaseHelper.getDatabase();
+
+    try {
       List<DecoupageHoraireModel>? data =
-          await decoupageHoraireService.getDecoupageHoraire(idRestaurant);
-      await decoupageHoraireJsStoreService.clearData();
-      for (var item in data!) {
-        item.idFront = makeString();
-        decoupageHoraireJsStoreService.addDecoupage(item);
-        listDecoupageHoraire.add(item);
+          await DecoupageHoraireService.getDecoupageHoraire(idRestaurant);
+      DecoupageHoraireJsStoreService dbService =
+          DecoupageHoraireJsStoreService(database);
+      bool tableExists = await dbService.tableExists('decoupage');
+
+      if (tableExists) {
+        // Table exists, clear the data
+        await dbService.clearData();
       }
-      //await setDateJourneeAndOuvertureFermetureTimer();
+
+      if (data.isNotEmpty) {
+        for (var item in data) {
+          item.idFront = makeString();
+          dbService.addDecoupage(item);
+          listDecoupageHoraire.add(item);
+        }
+        await setDateJourneeAndOuvertureFermetureTimer();
+      } else {
+        print('Data is empty.'); // Handle the case when data is null
+        // You can show an error message or take appropriate action.
+      }
+    } catch (e) {
+      // Handle exceptions here
+      print('Error in getDecopageHoraireAndSaveToLocalBase: $e');
+      // You can show an error message or handle the error as needed.
     }
   }
 
-  List<EmployeeModel> parseEmployeeData(String responseBody) {
+  static List<EmployeeModel> parseEmployeeData(String responseBody) {
     final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
     return parsed
         .map<EmployeeModel>((json) => EmployeeModel.fromJson(json))
         .toList();
   }
 
-  Future<void> getEmployeeActifAndSaveToLocalBase(int idRestaurant) async {
+  static Future<void> getEmployeeActifAndSaveToLocalBase(
+      String idRestaurant) async {
     List<EmployeeModel> actifEmployees = [];
     List<EmployeeModel> employeesToSave = [];
     List<EmployeeModel> allEmployees =
         []; // Declare and initialize allEmployees
 
     try {
-      final response = await employeeService
-          .getEmployeActifAndAbsenceByIdWithRestaurant(idRestaurant);
+      final response =
+          await EmployeeService.getEmployeActifAndAbsenceByIdWithRestaurant(
+              idRestaurant);
       actifEmployees = parseEmployeeData(response.body);
       allEmployees = List.from(actifEmployees);
 
@@ -609,7 +616,7 @@ class RestaurantDataService {
 
       if (employee.badge == null) {
         final employeeList =
-            await employeJsStoreService.getById(employee.idEmployee);
+            await EmployeJsStoreService.getById(employee.idEmployee);
         final employeeFromStore =
             employeeList.isNotEmpty ? employeeList.first : null;
 
@@ -630,9 +637,9 @@ class RestaurantDataService {
     }
   }
 
-  Future<void> structureDataToDisplay(List<ShiftModel> listShift) async {
+  static Future<void> structureDataToDisplay(List<ShiftModel> listShift) async {
     List<EmployeeModel> allEmployees =
-        await employeJsStoreService.getEmployesList();
+        await EmployeJsStoreService.getEmployesList();
 
     for (EmployeeModel employe in allEmployees) {
       employe.shifts = listShift
@@ -655,19 +662,19 @@ class RestaurantDataService {
     return jsonData.map((data) => ShiftModel.fromJson(data)).toList();
   }
 
-  Future<void> getShiftAndSaveToLocalBase(int idRestaurant) async {
+  static Future<void> getShiftAndSaveToLocalBase(String idRestaurant) async {
     List<ShiftModel> shifts = [];
     double totalDuration = 0;
 
     try {
       final response =
-          await shiftService.getListShiftByIdRestaurant(idRestaurant);
+          await ShiftService.getListShiftByIdRestaurant(idRestaurant);
       if (response != null && response.isNotEmpty) {
         shifts = response;
         structureDataToDisplay(shifts);
         SessionService.setSyncPlanningProgress(true);
 
-        await shiftJsStoreService.clearData();
+        await ShiftJsStoreService.clearData();
 
         for (ShiftModel item in shifts) {
           if (item.acheval && item.modifiable) {
@@ -685,7 +692,7 @@ class RestaurantDataService {
           item.idFront = makeString();
           item.idRestaurant = idRestaurant;
           Map<String, dynamic> shiftMap = item.toMap();
-          shiftJsStoreService.addShift(shiftMap);
+          ShiftJsStoreService.addShift(shiftMap);
           totalDuration += item.totalHeure;
         }
 
@@ -698,7 +705,7 @@ class RestaurantDataService {
     }
   }
 
-  Future<void> addAnomalie(List<AnomalieModel> anomalies) async {
+  static Future<void> addAnomalie(List<AnomalieModel> anomalies) async {
     Database _db = await openDatabase('_database.db');
 
     if (anomalies.isNotEmpty) {
@@ -714,13 +721,13 @@ class RestaurantDataService {
     }
   }
 
-  Future<void> getListAnomalies(int idRestaurant) async {
+  static Future<void> getListAnomalies(String idRestaurant) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     List<AnomalieModel>? anomalies =
-        await anomalieService.getAllAnomalieByRestaurant(idRestaurant);
+        await AnomalieService.getAllAnomalieByRestaurant(idRestaurant);
 
-    updateHeaderAnomalieService.setListGuiAnomalie(anomalies!);
+    UpdateHeaderAnomalieService.setListGuiAnomalie(anomalies!);
     SessionService.setNbrAnomalie(anomalies.length.toString());
 
     // Convert anomalies to a list of JSON strings
@@ -736,11 +743,11 @@ class RestaurantDataService {
     await addAnomalie(anomalies);
   }
 
-  Future<void> getMessagesAndSaveToLocalBase(int idRestaurant) async {
+  static Future<void> getMessagesAndSaveToLocalBase(String idRestaurant) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     List<MessageModel> messages =
-        await messageService.getMessagesByRestaurant(idRestaurant);
+        await MessageService.getMessagesByRestaurant(idRestaurant);
 
     List<MessageModel> storedMessages = [];
     if (prefs.containsKey('messages')) {
@@ -763,7 +770,7 @@ class RestaurantDataService {
     await prefs.setStringList('messages', storedMessagesJson);
   }
 
-  Future<void> getActiveTypesPointage() async {
+  static Future<void> getActiveTypesPointage() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     List<TypePointageModel> typesPointage =
@@ -791,7 +798,7 @@ class RestaurantDataService {
     await prefs.setStringList('typesPointage', storedTypesPointageJson);
   }
 
-  Future<void> getParametreList(int idRestaurant) async {
+  static Future<void> getParametreList(String idRestaurant) async {
     List<ParametreModel> parameters = [];
 
     await ParametreService.getAllParametreByIdRestaurat(idRestaurant)
@@ -809,7 +816,8 @@ class RestaurantDataService {
     });
   }
 
-  Future<void> getPointagesAndSaveToLocalBase(int idRestaurant) async {
+  static Future<void> getPointagesAndSaveToLocalBase(
+      String idRestaurant) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int idRestaurant = '' as int;
 
@@ -818,7 +826,8 @@ class RestaurantDataService {
 
     if (pointagesLocal.isEmpty) {
       List<PointageModel> backPointeusePointages =
-          await PlanningService.getListPointageByIdRestaurant(idRestaurant);
+          await PlanningService.getListPointageByIdRestaurant(
+              idRestaurant as String);
 
       if (backPointeusePointages.isNotEmpty) {
         for (var backPointage in backPointeusePointages) {
@@ -829,13 +838,15 @@ class RestaurantDataService {
                 .any((pointage) => pointage.idFront == backPointage.idFront)) {
               backPointage.idFront = makeString();
 
-              bool isNight = backPointage.heureDebutIsNight ?? false;
+              bool isNight = backPointage.heureDebutIsNight != null
+                  ? backPointage.heureDebutIsNight
+                  : false;
               DateTime dateDebut = DateService.createDateFromHourAndNightValue(
                 DateTime.parse(
                     '${backPointage.dateJournee} ${backPointage.heureDebut}'),
                 isNight,
               );
-              bool isHeureFinNight = backPointage.heureFinIsNight ?? false;
+              bool isHeureFinNight = backPointage.heureFinIsNight;
               DateTime dateFin = DateService.createDateFromHourAndNightValue(
                 DateTime.parse(
                     '${backPointage.dateJournee} ${backPointage.heureFin}'),
@@ -846,9 +857,9 @@ class RestaurantDataService {
               if (backPointage.idShift == 0) {
                 backPointage.idShift = null;
               }
-              backPointage.typePointageRef = await typePointageJsStoreService
-                      .getOneById(backPointage.idTypePointageRef)
-                  as TypePointageModel;
+              backPointage.typePointageRef =
+                  await TypePointageJsStoreService.getOneById(
+                      backPointage.idTypePointageRef) as TypePointageModel;
               backPointage.idRestaurant = idRestaurant;
               PlaningJsStoreService.addPointage(backPointage);
               listPointage.add(backPointage);
@@ -874,111 +885,92 @@ class RestaurantDataService {
     });
   }
 
-  Future<bool> confirmAssociation(String codeRestaurant) async {
+  static Future<bool> confirmAssociation(String codeRestaurant) async {
     bool value = await confirmAssociation(codeRestaurant);
     return value;
   }
 
-  Future<void> getInfoToPointeuse(int idRestaurant) async {
+  static Future<void> getInfoToPointeuse(String idRestaurant) async {
     PlaningJsStoreService instance = PlaningJsStoreService();
-    if (isOnline) {
-      // await getTokenPointeuseFromV2();
-      await getDecopageHoraireAndSaveToLocalBase(idRestaurant);
-      await getEmployeeActifAndSaveToLocalBase(idRestaurant);
-      await getShiftAndSaveToLocalBase(idRestaurant);
-      await getListAnomalies(idRestaurant);
-      await getMessagesAndSaveToLocalBase(idRestaurant);
-      await getActiveTypesPointage();
-      await getParametreList(idRestaurant);
-      await getPointagesAndSaveToLocalBase(idRestaurant);
-      await PlaningJsStoreService.deleteAllPointageBefore2Months();
-      final paramPret =
-          await ParametreJsStoreService.getParamatreByParam(param);
+    var uuid = SessionService.uuidGenerator(idRestaurant);
+    // await getTokenPointeuseFromV2();
 
-      if (paramPret.isNotEmpty && paramPret[0].valeur == 'true') {
-        await getEmployePreteActifAndShiftAndPointage(idRestaurant);
-      } else {
-        await setDateJourneeAndOuvertureFermetureTimer();
-      }
+    //4cbbe87d-941822116b0f-41a3-8
+    await getDecopageHoraireAndSaveToLocalBase(uuid);
+    await getEmployeeActifAndSaveToLocalBase(idRestaurant);
+    await getShiftAndSaveToLocalBase(idRestaurant);
+    await getListAnomalies(idRestaurant);
+    await getMessagesAndSaveToLocalBase(idRestaurant);
+    await getActiveTypesPointage();
+    await getParametreList(idRestaurant);
+    await getPointagesAndSaveToLocalBase(idRestaurant);
+    await PlaningJsStoreService.deleteAllPointageBefore2Months();
+    final paramPret = await ParametreJsStoreService.getParamatreByParam(param);
+
+    if (paramPret.isNotEmpty && paramPret[0].valeur == 'true') {
+      await getEmployePreteActifAndShiftAndPointage(idRestaurant);
+    } else {
+      await setDateJourneeAndOuvertureFermetureTimer();
     }
   }
 
-  Future<void> getRestaurantByCodePointeuse() async {
-    int restaurantId =
-        await SessionService.getIdRestaurant() ?? 0; // Use 0 as a default value
-    await setIsAssociatedToFalse(restaurantId);
-    // displaySpinner = true;
-    // displayModal = false;
+  static Future<String> getBearerToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('bearerToken') ??
+        ''; // Return an empty string if the token doesn't exist
+  }
 
-    try {
-      final Map<String, dynamic> restaurantData =
-          await RestaurantService.getRestauratByCodePointeuse(codeRestaurant);
+  static Future<void> getRestaurantByCodePointeuse(String codePointeuse) async {
+    final token = await getBearerToken();
+    final response = await http.get(
+        Uri.parse(
+            'https://qa.myrhis.fr/employee/restaurant/byCodePointeuse/$codePointeuse'),
+        headers: {
+          'Authorization':
+              'Bearer_RH_IS eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJpc21haWwubWFuc291cmlAcmhpcy1zb2x1dGlvbnMuY29tIiwiYXVkIjoiNDMyMCIsImlzcyI6ImV5SmhiR2NpT2lKSVV6STFOaUo5LmV5SnpkV0lpT2lKU1JVWlNSVk5JWDFSUFMwVk9JaXdpYVhOeklqb2lhWE50WVdsc0xtMWhibk52ZFhKcFFISm9hWE10YzI5c2RYUnBiMjV6TG1OdmJTSXNJbVY0Y0NJNk1UWTVPRFUyTnpnMk4zMC5qZWhTdDVfZ1FMN3g5X2dWV3hGamRWUU9EdTNtY1lOTkVpcllPWWduOHRNIiwiZXhwIjoxNjk4NTY3ODY3LCJhdXRob3JpdGllcyI6W119.ZEsz4Y917TGGfJZuMCKOU50fjEAzhB6OCwLqDJsBhqc',
+          'Content-Type': 'application/json',
+        });
 
-      final restaurant = RestaurantModel.fromJson(restaurantData);
-
+    if (response.statusCode == 200) {
+      final Map<String, dynamic>? restaurantData = json.decode(response.body);
+      final restaurant = RestaurantModel.fromJson(restaurantData!);
       if (restaurant != null && restaurant.idRestaurant != null) {
         restaurant.idFront = makeString();
         idRestaurant = restaurant.idRestaurant!;
-        infoRestaurantJsStoreService.addRestaurant(restaurant);
+        InfoRestaurantJsStoreService.addRestaurant(restaurant);
         PointingService.restaurant = restaurant;
-        RestaurantDataService restaurantDataService = RestaurantDataService(
-          employeeService,
-          decoupageHoraireService,
-          shiftService,
-          sessionService,
-          anomalieService,
-          updateHeaderAnomalieService,
-          messageService,
-          shiftJsStoreService,
-          decoupageHoraireJsStoreService,
-          employeJsStoreService,
-          infoRestaurantJsStoreService,
-          messageJsStoreService,
-          parameterJsStoreService,
-          typePointageJsStoreService,
-          restaurantService,
-          checkingSocialConstraintsRegularlyService,
-          dateService,
-          dateHelperService,
-          contrainteSocialeService,
-          onlineService,
-          idRestaurant,
-          sharedPreferences,
-        );
-// Create an instance
-        await restaurantDataService.getInfoToPointeuse(idRestaurant);
-        SessionService.idRestaurant!;
-        SessionService.codeRestaurant!;
-        SessionService.restaurantName!;
-        SessionService.pointeuseState!;
+
+        await RestaurantDataService.getInfoToPointeuse(
+            restaurant.idRestaurant.toString());
+        SessionService.setIdRestaurant(restaurant.idRestaurant.toString());
+        SessionService.setCodeRestaurant(codeRestaurant!);
+        SessionService.setRestaurantName(restaurant.libelle);
+        SessionService.setPointeuseState(true);
+        NotificationService.showSuccessMessage('POINTEUSE.ASSOCIETED');
+
+        final idTimeout = Timer(Duration(seconds: 2), () async {
+          // if (!SessionService.getIsTechnicien()) {
+          //  // displaySpinner = false;
+          // }
+          if (await confirmAssociation(codeRestaurant!)) {
+            print('confirmed association');
+          } else {
+            print('denied association');
+          }
+          SessionService.setLastSync(DateTime.now().toString());
+          SessionService.setEmploye(0);
+        });
+
+        await idTimeout;
+
+        // You may need to use the `dart:html` package for web-based navigation
+        // window.location.href = '/';
       }
-    } catch (error) {
-      print(error);
+    } else {
+      print(response.body.toString());
     }
-
-    /* notificationService.showSuccessMessage(
-            rhisTranslateService.translate('POINTEUSE.ASSOCIETED'));*/
-
-    final idTimeout = Timer(Duration(seconds: 2), () async {
-      if (!SessionService.isTechnicien) {
-        // displaySpinner = false;
-      }
-
-      final confirmedAssociation = await confirmAssociation(codeRestaurant);
-      if (confirmedAssociation) {
-        print('confirmed association');
-      } else {
-        print('denied association');
-      }
-
-      SessionService.setLastSync(DateTime.now().toString());
-      SessionService.setEmploye(0);
-      // idTimeout.cancel();
-      // Replace the window.location.href logic with appropriate navigation logic in Flutter
-      // For example, Navigator.pushReplacement or Navigator.pushAndRemoveUntil
-    });
-  } /* onError: (err) {
-      */ /*  notificationService.showErrorMessage(
+  }
+/*  notificationService.showErrorMessage(
           rhisTranslateService.translate('POINTEUSE.ASSOCIATION_ERROR'));*/ /*
       clicked = false;
       displaySpinner = false;

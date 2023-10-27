@@ -30,28 +30,41 @@ class EmployeeService extends GenericCRUDRestService<EmployeeModel, String> {
 
   Future<List<int>> getSavedEmployeeIds() async {
     final stringList = sharedPreferences.getStringList('employeeIds');
-    return stringList?.map((idStr) => int.parse(idStr))?.toList() ?? [];
+    return stringList?.map((idStr) => int.parse(idStr)).toList() ?? [];
   }
 
-  Future<http.Response> getEmployeActifAndAbsenceByIdWithRestaurant(
-      int idRestaurant) async {
-    final dateJournee = SessionService.getDateJournee();
+  static Future<http.Response> getEmployeActifAndAbsenceByIdWithRestaurant(
+      String idRestaurant) async {
+    final dateJournee = await SessionService.getDateJournee();
+
+    if (dateJournee == null) {
+      // Handle the case where dateJournee is null
+      throw Exception('DateJournee is null');
+    }
+
     final newDate = DateTime.parse(dateJournee);
-    final initializedDate = DateTime(newDate.year, newDate.month,
-        int.parse(dateJournee.substring(8)), 0, 0, 0);
+    final initializedDate =
+        DateTime(newDate.year, newDate.month, newDate.day, 0, 0, 0);
+
     final uuidRestaurant = SessionService.uuidGenerator(idRestaurant);
     final dateChoisit = DateService.formatDateToScoreDelimiter(initializedDate);
+
+    if (uuidRestaurant == null || dateChoisit == null) {
+      // Handle the case where uuidRestaurant or dateChoisit is null
+      throw Exception('UUID or Date is null');
+    }
+
     final response = await http.get(Uri.parse(
         'https://qa.myrhis.fr/employeActifAndAbsencePointeuse/$uuidRestaurant/$dateChoisit'));
     return response;
   }
 
-  Future<http.Response>
+  static Future<http.Response>
       getEmployePreteActifAndShiftAndPointageByIdRestaurantAndDateJournee(
-          int idRestaurant) async {
+          String idRestaurant) async {
     final uuidRestaurant = SessionService.uuidGenerator(idRestaurant);
     final dateChoisit = DateService.formatDateToScoreDelimiter(
-        DateTime.parse(SessionService.getDateJournee()));
+        DateTime.parse(await SessionService.getDateJournee()));
     final response = await http.get(Uri.parse(
         'https://qa.myrhis.fr/employePreteActifAndAbsenceForPointeuse/$uuidRestaurant/$dateChoisit'));
     return response;

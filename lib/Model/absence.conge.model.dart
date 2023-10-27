@@ -4,20 +4,20 @@ import 'enumeration/status.demande.conge.enum.dart';
 import 'type.evenement.model.dart';
 
 class AbsenceCongeModel {
-  int? idAbsenceConge;
-  dynamic dateDebut;
-  dynamic dateFin;
-  dynamic heureDebut;
-  bool? heureDebutValeurNuit;
-  dynamic heureFin;
-  bool? heureFinValeurNuit;
-  int? dureeHeure;
-  int? dureeJour;
-  bool? periodeHoraire;
-  StatusDemandeCongeEnumeration? status;
-  TypeEvenementModel? typeEvenement;
-  int? idEmployee;
-  List<DetailEvenement>? detailEvenements;
+  late String idAbsenceConge;
+  late var dateDebut;
+  late var dateFin;
+  late var heureDebut;
+  late bool heureDebutValeurNuit;
+  late var heureFin;
+  late bool heureFinValeurNuit;
+  late String dureeHeure;
+  late String dureeJour;
+  late bool periodeHoraire;
+  late StatusDemandeCongeEnumeration? status;
+  late TypeEvenementModel? typeEvenement;
+  late int? idEmployee;
+  late List<DetailEvenement>? detailEvenements;
 
   AbsenceCongeModel({
     idAbsenceConge,
@@ -38,16 +38,16 @@ class AbsenceCongeModel {
 
   factory AbsenceCongeModel.fromJson(Map<String, dynamic> map) {
     return AbsenceCongeModel(
-      idAbsenceConge: map['idAbsenceConge'],
-      dateDebut: map['dateDebut'],
-      dateFin: map['dateFin'],
-      heureDebut: map['heureDebut'],
-      heureDebutValeurNuit: map['heureDebutValeurNuit'],
-      heureFin: map['heureFin'],
-      heureFinValeurNuit: map['heureFinValeurNuit'],
-      dureeHeure: map['dureeHeure'],
-      dureeJour: map['dureeJour'],
-      periodeHoraire: map['periodeHoraire'],
+      idAbsenceConge: map['idAbsenceConge'] ?? '',
+      dateDebut: map['dateDebut'] ?? '',
+      dateFin: map['dateFin'] ?? '',
+      heureDebut: map['heureDebut'] ?? '',
+      heureDebutValeurNuit: map['heureDebutValeurNuit'] ?? false,
+      heureFin: map['heureFin'] ?? '',
+      heureFinValeurNuit: map['heureFinValeurNuit'] ?? false,
+      dureeHeure: map['dureeHeure'] ?? '',
+      dureeJour: map['dureeJour'] ?? '',
+      periodeHoraire: map['periodeHoraire'] ?? false,
       status: StatusDemandeCongeEnumeration.values,
       typeEvenement: TypeEvenementModel.fromJson(map['typeEvenement']),
       idEmployee: map[

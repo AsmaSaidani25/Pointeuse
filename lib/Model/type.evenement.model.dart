@@ -22,15 +22,15 @@ class TypeEvenementModel {
   });
   factory TypeEvenementModel.fromJson(Map<String, dynamic> map) {
     return TypeEvenementModel(
-      idTypeEvenement: map['idTypeEvenement'],
-      code: map['code'],
-      libelle: map['libelle'],
-      codeGdh: map['codeGdh'],
-      codePaye: map['codePaye'],
-      payer: map['payer'],
-      travaille: map['travaille'],
-      previsible: map['previsible'],
-      statut: map['statut'],
+      idTypeEvenement: map['idTypeEvenement'] ?? '',
+      code: map['code'] ?? '',
+      libelle: map['libelle'] ?? '',
+      codeGdh: map['codeGdh'] ?? '',
+      codePaye: map['codePaye'] ?? '',
+      payer: map['payer'] ?? false,
+      travaille: map['travaille'] ?? false,
+      previsible: map['previsible'] ?? false,
+      statut: map['statut'] ?? false,
     );
   }
   factory TypeEvenementModel.fromMap(Map<String, dynamic> map) {

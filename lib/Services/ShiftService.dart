@@ -16,10 +16,11 @@ class ShiftService extends GenericCRUDRestService<ShiftModel, String> {
   ShiftService(PathService pathService, http.Client httpClient,
       SessionService sessionService, DateService dateHelperService);
 
-  Future<List<ShiftModel>?> getListShiftByIdRestaurant(int idRestaurant) async {
+  static Future<List<ShiftModel>?> getListShiftByIdRestaurant(
+      String idRestaurant) async {
     final uuidRestaurant = SessionService.idRestaurant;
     final dateJournee = DateService.formatDateToScoreDelimiter(
-        DateTime.parse(SessionService.getDateJournee()));
+        DateTime.parse(await SessionService.getDateJournee()));
     final response = await http.get(Uri.parse(
         'https://qa.myrhis.fr/shiftInPointeuse/$uuidRestaurant/$dateJournee'));
 

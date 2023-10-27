@@ -105,7 +105,7 @@ class EmployeJsStoreService {
     return await _database!.delete('employee');
   }
 
-  Future<List<EmployeeModel>> getEmployesList() async {
+  static Future<List<EmployeeModel>> getEmployesList() async {
     final List<Map<String, dynamic>> maps = await _database!.query('employee');
     return List.generate(
         maps.length, (index) => EmployeeModel.fromMap(maps[index]));
@@ -121,7 +121,7 @@ class EmployeJsStoreService {
   }*/
 
   static Future<void> deleteEmployeePrete(
-      String tableName, int idRestaurant) async {
+      String tableName, String idRestaurant) async {
     try {
       await _database!.delete(tableName,
           where: 'idRestaurant = ?', whereArgs: [idRestaurant]);
@@ -142,7 +142,7 @@ class EmployeJsStoreService {
     throw Exception('Employee not found');
   }
 
-  Future<int> addEmployee(EmployeeModel entity) async {
+  static Future<int> addEmployee(EmployeeModel entity) async {
     try {
       final id = await _database!.insert('employee', entity.toMap());
       return id;
@@ -152,7 +152,7 @@ class EmployeJsStoreService {
     }
   }
 
-  Future<List<EmployeeModel>> getById(int entityIdEmploye) async {
+  static Future<List<EmployeeModel>> getById(int entityIdEmploye) async {
     final List<Map<String, dynamic>> maps = await _database!.query(
       'employee',
       where: 'id = ?',

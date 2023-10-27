@@ -15,7 +15,7 @@ class ParametreService extends GenericCRUDRestService<ParametreModel, int> {
       : super(httpClient, baseUrl);*/
 
   static Future<List<ParametreModel>> getAllParametreByIdRestaurat(
-      int idRestaurant) async {
+      String idRestaurant) async {
     final uuidRestaurant = SessionService.uuidGenerator(idRestaurant);
     final response = await http.get(Uri.parse(
         'https://qa.myrhis.fr/employee/params/all/parametrePointeuse/' +
@@ -31,7 +31,7 @@ class ParametreService extends GenericCRUDRestService<ParametreModel, int> {
   }
 
   Future<List<ParametreModel>> updateParamsByRestaurant(
-      List<ParametreModel> listeParametres, int idRestaurant) async {
+      List<ParametreModel> listeParametres, String idRestaurant) async {
     final uuidRestaurant = SessionService.uuidGenerator(idRestaurant);
     setStringFromDate(listeParametres);
     final response = await http.put(

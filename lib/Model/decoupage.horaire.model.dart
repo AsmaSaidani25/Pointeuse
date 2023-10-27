@@ -99,35 +99,35 @@ class DecoupageHoraireModel {
     required this.fin,
   });
   DecoupageHoraireModel.fromJson(Map<String, dynamic> json) {
-    idDecoupageHoraire = json['idDecoupageHoraire'];
-    valeurDimanche = json['valeurDimanche'];
-    valeurDimancheIsNight = json['valeurDimancheIsNight'];
-    valeurDimancheIsNew = json['valeurDimancheIsNew'];
-    idFront = json['idFront'];
-    valeurLundi = json['valeurLundi'];
-    valeurLundiIsNight = json['valeurLundiIsNight'];
-    valeurLundiIsNew = json['valeurLundiIsNew'];
-    valeurMardi = json['valeurMardi'];
-    valeurMardiIsNight = json['valeurMardiIsNight'];
-    valeurMardiIsNew = json['valeurMardiIsNew'];
-    valeurMercredi = json['valeurMercredi'];
-    valeurMercrediIsNight = json['valeurMercrediIsNight'];
-    valeurMercrediIsNew = json['valeurMercrediIsNew'];
-    valeurJeudi = json['valeurJeudi'];
-    valeurJeudiIsNight = json['valeurJeudiIsNight'];
-    valeurJeudiIsNew = json['valeurJeudiIsNew'];
-    valeurVendredi = json['valeurVendredi'];
-    valeurVendrediIsNight = json['valeurVendrediIsNight'];
-    valeurVendrediIsNew = json['valeurVendrediIsNew'];
-    valeurSamedi = json['valeurSamedi'];
-    valeurSamediIsNight = json['valeurSamediIsNight'];
-    valeurSamediIsNew = json['valeurSamediIsNew'];
-    hasCorrectValue = json['hasCorrectValue'];
-    isVisited = json['isVisited'];
-    canDelete = json['canDelete'];
-    phaseLibelle = json['phaseLibelle'];
-    debut = json['debut'];
-    fin = json['fin'];
+    idDecoupageHoraire = json['idDecoupageHoraire'] ?? '';
+    valeurDimanche = json['valeurDimanche'] ?? '';
+    valeurDimancheIsNight = json['valeurDimancheIsNight'] as bool? ?? false;
+    valeurDimancheIsNew = json['valeurDimancheIsNew'] as bool? ?? false;
+    idFront = json['idFront'] ?? '';
+    valeurLundi = json['valeurLundi'] ?? '';
+    valeurLundiIsNight = json['valeurLundiIsNight'] as bool? ?? false;
+    valeurLundiIsNew = json['valeurLundiIsNew'] as bool? ?? false;
+    valeurMardi = json['valeurMardi'] ?? '';
+    valeurMardiIsNight = json['valeurMardiIsNight'] as bool? ?? false;
+    valeurMardiIsNew = json['valeurMardiIsNew'] as bool? ?? false;
+    valeurMercredi = json['valeurMercredi'] ?? '';
+    valeurMercrediIsNight = json['valeurMercrediIsNight'] ?? false;
+    valeurMercrediIsNew = json['valeurMercrediIsNew'] ?? false;
+    valeurJeudi = json['valeurJeudi'] ?? '';
+    valeurJeudiIsNight = json['valeurJeudiIsNight'] ?? false;
+    valeurJeudiIsNew = json['valeurJeudiIsNew'] ?? false;
+    valeurVendredi = json['valeurVendredi'] ?? '';
+    valeurVendrediIsNight = json['valeurVendrediIsNight'] ?? false;
+    valeurVendrediIsNew = json['valeurVendrediIsNew'] ?? false;
+    valeurSamedi = json['valeurSamedi'] ?? '';
+    valeurSamediIsNight = json['valeurSamediIsNight'] ?? false;
+    valeurSamediIsNew = json['valeurSamediIsNew'] ?? false;
+    hasCorrectValue = json['hasCorrectValue'] ?? false;
+    isVisited = json['isVisited'] ?? false;
+    canDelete = json['canDelete'] ?? false;
+    phaseLibelle = json['phaseLibelle'] ?? '';
+    debut = json['debut'] ?? new DateTime(2012 - 01 - 01);
+    fin = json['fin'] ?? new DateTime(2012 - 01 - 01);
   }
   factory DecoupageHoraireModel.fromMap(Map<String, dynamic> map) {
     return DecoupageHoraireModel(

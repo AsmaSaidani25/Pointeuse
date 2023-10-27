@@ -27,7 +27,7 @@ class InfoRestaurantJsStoreService {
     return _database;
   }
 
-  Future<void> addRestaurant(RestaurantModel restaurant) async {
+  static Future<void> addRestaurant(RestaurantModel restaurant) async {
     final mapRepresentation =
         restaurant.toJson(); // Convert RestaurantModel to Map
     await _database!.insert('restaurant', mapRepresentation);

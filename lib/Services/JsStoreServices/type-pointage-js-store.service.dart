@@ -19,16 +19,21 @@ class TypePointageJsStoreService {
     return _db.query('TYPE_POINTAGE');
   }
 
-  Future<List<Map<String, dynamic>>> getOneByLibelle(String libelle) async {
-    return _db.query(
+  static Future<List<Map<String, dynamic>>> getOneByLibelle(
+      String libelle) async {
+    TypePointageJsStoreService instance = TypePointageJsStoreService();
+
+    return instance._db.query(
       'TYPE_POINTAGE',
       where: 'libelle = ?',
       whereArgs: [libelle],
     );
   }
 
-  Future<List<Map<String, dynamic>>> getOneById(int id) async {
-    return await _db.query(
+  static Future<List<Map<String, dynamic>>> getOneById(int id) async {
+    TypePointageJsStoreService instance = TypePointageJsStoreService();
+
+    return await instance._db.query(
       'TYPE_POINTAGE',
       where: 'id = ?',
       whereArgs: [id],

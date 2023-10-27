@@ -1,55 +1,55 @@
 class AnomalieModel {
   int? idAnomalie;
-  String? idFrontPointage;
-  int? idEmployee;
+  late String idFrontPointage;
+  late int idEmployee;
   int? idRestaurant;
   String? idFront;
-  String? badgeEmployee;
-  String? nomEmploye;
-  bool? isPreAlarme;
-  String? prenomEmploye;
-  String? valeurDepasse;
-  String? valeurContrainte;
-  String? libelleAnomalie;
-  String? codeAnomalie;
-  bool? valide;
-  dynamic dateAnomalie;
+  late String badgeEmployee;
+  late String nomEmploye;
+  late bool isPreAlarme;
+  late String? prenomEmploye;
+  late String valeurDepasse;
+  late String valeurContrainte;
+  late String libelleAnomalie;
+  late String codeAnomalie;
+  late bool valide;
+  late dynamic dateAnomalie;
 
   AnomalieModel({
     this.idAnomalie,
-    this.idFrontPointage,
-    this.idEmployee,
+    required this.idFrontPointage,
+    required this.idEmployee,
     this.idRestaurant,
     this.idFront,
-    this.badgeEmployee,
-    this.nomEmploye,
-    this.isPreAlarme,
+    required this.badgeEmployee,
+    required this.nomEmploye,
+    required this.isPreAlarme,
     this.prenomEmploye,
-    this.valeurDepasse,
-    this.valeurContrainte,
-    this.libelleAnomalie,
-    this.codeAnomalie,
-    this.valide,
+    required this.valeurDepasse,
+    required this.valeurContrainte,
+    required this.libelleAnomalie,
+    required this.codeAnomalie,
+    required this.valide,
     this.dateAnomalie,
   });
 
   factory AnomalieModel.fromJson(Map<String, dynamic> json) {
     return AnomalieModel(
-      idAnomalie: json['idAnomalie'],
-      idFrontPointage: json['idFrontPointage'],
-      idEmployee: json['idEmployee'],
-      idRestaurant: json['idRestaurant'],
-      idFront: json['idFront'],
-      badgeEmployee: json['badgeEmployee'],
-      nomEmploye: json['nomEmploye'],
-      isPreAlarme: json['isPreAlarme'],
-      prenomEmploye: json['prenomEmploye'],
-      valeurDepasse: json['valeurDepasse'],
-      valeurContrainte: json['valeurContrainte'],
-      libelleAnomalie: json['libelleAnomalie'],
-      codeAnomalie: json['codeAnomalie'],
-      valide: json['valide'],
-      dateAnomalie: json['dateAnomalie'],
+      idAnomalie: json['idAnomalie'] ?? '',
+      idFrontPointage: json['idFrontPointage'] ?? '',
+      idEmployee: json['idEmployee'] ?? '',
+      idRestaurant: json['idRestaurant'] ?? '',
+      idFront: json['idFront'] ?? '',
+      badgeEmployee: json['badgeEmployee'] ?? '',
+      nomEmploye: json['nomEmploye'] ?? '',
+      isPreAlarme: json['isPreAlarme'] ?? false,
+      prenomEmploye: json['prenomEmploye'] ?? '',
+      valeurDepasse: json['valeurDepasse'] ?? '',
+      valeurContrainte: json['valeurContrainte'] ?? '',
+      libelleAnomalie: json['libelleAnomalie'] ?? '',
+      codeAnomalie: json['codeAnomalie'] ?? '',
+      valide: json['valide'] ?? false,
+      dateAnomalie: json['dateAnomalie'] ?? '',
     );
   }
 

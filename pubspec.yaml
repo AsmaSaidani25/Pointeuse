@@ -49,6 +49,7 @@ dependencies:
   curved_labeled_navigation_bar: ^2.0.2 #latest version
   uuid: ^3.0.7
   provider: ^6.0.5
+  dio: ^4.0.6
 
 
 

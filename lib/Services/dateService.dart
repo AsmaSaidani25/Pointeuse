@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pointeuse/Model/decoupage.horaire.model.dart';
 import 'package:pointeuse/Model/shift.model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 enum JourSemaine {
   DIMANCHE,
@@ -235,7 +233,8 @@ class DateService {
     );
   }
 
-  DateTime getCorrectDateJournee([DateTime? date, bool initHours = false]) {
+  static DateTime getCorrectDateJournee(
+      [DateTime? date, bool initHours = false]) {
     final rawDate = date ?? DateTime.now();
     final userTimezoneOffset = rawDate.timeZoneOffset.inMilliseconds;
     if (userTimezoneOffset > 0) {
@@ -360,7 +359,7 @@ class DateService {
     return d1.difference(d2).inMilliseconds;
   }
 
-  String getYesterDay(DateTime today) {
+  static String getYesterDay(DateTime today) {
     final yesterday = today.subtract(Duration(days: 1));
     return DateFormat('yyyy-MM-dd').format(yesterday);
   }
